@@ -28,6 +28,16 @@ class LoginTest extends TestCase
         ]);
     }
 
+    public function test_login_time_is_stored_without_a_timezone_shift(): void
+    {
+        $user = User::factory()->create();
+
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+
+        $loggedInAt = $user->loginActivities()->sole()->logged_in_at;
+        $this->assertLessThan(60, abs(now()->diffInSeconds($loggedInAt)));
+    }
+
     public function test_email_is_matched_case_insensitively(): void
     {
         User::factory()->create(['email' => 'juan@example.com']);

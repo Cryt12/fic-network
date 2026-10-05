@@ -97,6 +97,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Must match app.timezone. Laravel writes timestamps without an offset, so a
+            // server default like Asia/Manila would shift every timestamptz by 8 hours.
+            'timezone' => 'UTC',
         ],
 
         'sqlsrv' => [
