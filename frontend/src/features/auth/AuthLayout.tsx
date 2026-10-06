@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, Outlet, useLocation } from 'react-router'
-import { Wordmark } from '@/components/Wordmark'
+import logo from '@/assets/onefic-logo.png'
 import { FicMap } from '@/features/map/FicMap'
 import { cn } from '@/lib/utils'
 
@@ -14,18 +14,20 @@ export function AuthLayout() {
   return (
     <div className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       {/* Logo and form share one centered column, so wide screens don't strand the form at the edge. */}
-      <div className="flex justify-center px-4 py-6 sm:px-10 lg:py-10">
-        <div className="flex w-full max-w-md flex-col">
-          <Link to="/login" className="w-fit rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
-            <Wordmark />
+      {/* Logo and form share one centered column, so wide screens don't strand the form at the edge. */}
+      <div className="flex justify-center px-4 py-8 sm:px-10 lg:py-12">
+        <main className="flex w-full max-w-md flex-col justify-center">
+          <Link
+            to="/login"
+            className="mb-10 block w-fit rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <img src={logo} alt="OneFIC - Philippine Food Innovation Network" width={720} height={270} className="h-auto w-64 sm:w-80" />
           </Link>
 
-          <main className="flex flex-1 items-center py-10">
-            <div key={pathname} className="w-full auth-panel-enter">
-              <Outlet />
-            </div>
-          </main>
-        </div>
+          <div key={pathname} className="w-full auth-panel-enter">
+            <Outlet />
+          </div>
+        </main>
       </div>
 
       {/* Explore the region while you sign in. Stays put while the left side scrolls. */}

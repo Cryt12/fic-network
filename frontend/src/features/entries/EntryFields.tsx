@@ -1,5 +1,5 @@
 import { RotateCw } from 'lucide-react'
-import { Controller, get, type FieldValues, type Path, type UseFormReturn } from 'react-hook-form'
+import { Controller, get, useWatch, type FieldValues, type Path, type UseFormReturn } from 'react-hook-form'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -90,37 +90,8 @@ function EntryInput<T extends FieldValues>({ form, fieldKey, prefix }: EntryInpu
     case 'region':
       return <RegionSelect form={form} name={name} id={id} label={config.label} error={error} />
 
-    case 'geotag': {
-      const lng = `${prefix}longitude` as Path<T>
-      return (
-        <Controller
-          control={form.control}
-          name={name}
-          render={({ field: latField }) => (
-            <Controller
-              control={form.control}
-              name={lng}
-              render={({ field: lngField }) => (
-                <FieldSet>
-                  <FieldLegend variant="label">Geotag (latitude and longitude)</FieldLegend>
-                  <GeotagPicker
-                    latitude={latField.value}
-                    longitude={lngField.value}
-                    errors={{ latitude: error, longitude: get(form.formState.errors, lng) }}
-                    onChange={(lat, lngValue) => {
-                      // Only revalidate after a submit attempt, like every other field.
-                      const options = { shouldValidate: form.formState.isSubmitted, shouldDirty: true }
-                      form.setValue(name, lat as never, options)
-                      form.setValue(lng, lngValue as never, options)
-                    }}
-                  />
-                </FieldSet>
-              )}
-            />
-          )}
-        />
-      )
-    }
+    case 'geotag':
+      return <GeotagField form={form} prefix={prefix} />
 
     case 'radio': {
       const { options } = config.input
@@ -196,6 +167,32 @@ function EntryInput<T extends FieldValues>({ form, fieldKey, prefix }: EntryInpu
       )
     }
   }
+}
+
+/** Latitude + longitude via the map picker, which also follows the Region field. */
+function GeotagField<T extends FieldValues>({ form, prefix }: { form: UseFormReturn<T>; prefix: string }) {
+  const lat = `${prefix}latitude` as Path<T>
+  const lng = `${prefix}longitude` as Path<T>
+  const region = useWatch({ control: form.control, name: `${prefix}region` as Path<T> }) as string | undefined
+  const [latitude, longitude] = useWatch({ control: form.control, name: [lat, lng] }) as [number | undefined, number | undefined]
+
+  return (
+    <FieldSet>
+      <FieldLegend variant="label">Geotag (latitude and longitude)</FieldLegend>
+      <GeotagPicker
+        latitude={latitude}
+        longitude={longitude}
+        region={region}
+        errors={{ latitude: get(form.formState.errors, lat), longitude: get(form.formState.errors, lng) }}
+        onChange={(latValue, lngValue) => {
+          // Only revalidate after a submit attempt, like every other field.
+          const options = { shouldValidate: form.formState.isSubmitted, shouldDirty: true }
+          form.setValue(lat, latValue as never, options)
+          form.setValue(lng, lngValue as never, options)
+        }}
+      />
+    </FieldSet>
+  )
 }
 
 type RegionSelectProps<T extends FieldValues> = {

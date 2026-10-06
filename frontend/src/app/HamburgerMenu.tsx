@@ -49,9 +49,9 @@ export function HamburgerMenu() {
       </SheetTrigger>
 
       <SheetContent side="left" className="w-80 gap-0 p-0">
-        <SheetHeader className="h-14 justify-center border-b px-4">
+        <SheetHeader className="h-20 justify-center border-b-2 px-4">
           <SheetTitle>
-            <Wordmark />
+            <Wordmark className="h-14" />
           </SheetTitle>
           <SheetDescription className="sr-only">Main navigation</SheetDescription>
         </SheetHeader>
@@ -95,7 +95,7 @@ export function HamburgerMenu() {
             type="button"
             onClick={onLogout}
             disabled={logout.isPending}
-            className="flex h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-foreground/85 outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+            className="flex h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-foreground/85 outline-none transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-3 focus-visible:ring-destructive/30 disabled:opacity-50"
           >
             <LogOut className="size-4" aria-hidden />
             {logout.isPending ? 'Logging out...' : 'Logout'}

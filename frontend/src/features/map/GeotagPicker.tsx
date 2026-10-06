@@ -1,6 +1,6 @@
 import type { LeafletMouseEvent, Marker as LeafletMarker } from 'leaflet'
 import { Crosshair, LoaderCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import type { FieldError as FormFieldError } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
@@ -8,12 +8,15 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { Input } from '@/components/ui/input'
 import { CARAGA_BOUNDS } from '@/features/map/constants'
 import { pinIcon } from '@/features/map/icons'
+import { REGION_BOUNDS } from '@/features/map/region-bounds'
 
 type GeotagPickerProps = {
   latitude: number | undefined
   longitude: number | undefined
   onChange: (latitude: number | undefined, longitude: number | undefined) => void
   errors: { latitude?: FormFieldError; longitude?: FormFieldError }
+  /** Region code from the Region field: the map zooms to it when it changes. */
+  region?: string
 }
 
 /** Matches the database column, numeric(10,7). */
@@ -26,7 +29,7 @@ const isValid = (lat: number | undefined, lng: number | undefined): lat is numbe
  * Set a FIC's geotag four ways: click the map, drag the pin, use the browser's location,
  * or type the coordinates. All four stay in sync.
  */
-export function GeotagPicker({ latitude, longitude, onChange, errors }: GeotagPickerProps) {
+export function GeotagPicker({ latitude, longitude, onChange, errors, region }: GeotagPickerProps) {
   const [locating, setLocating] = useState(false)
   const [locateError, setLocateError] = useState<string | null>(null)
   const hasPoint = isValid(latitude, longitude)
@@ -81,6 +84,7 @@ export function GeotagPicker({ latitude, longitude, onChange, errors }: GeotagPi
             maxZoom={19}
           />
           <ClickToPlace onPlace={(lat, lng) => onChange(round(lat), round(lng))} />
+          <ZoomToRegion region={region} hasPoint={hasPoint} />
           {hasPoint && (
             <>
               <Marker
@@ -127,6 +131,26 @@ export function GeotagPicker({ latitude, longitude, onChange, errors }: GeotagPi
       </div>
     </div>
   )
+}
+
+/**
+ * Frames the chosen region. Runs when the region changes, and on first show only if no pin
+ * is set yet (so editing an entry opens on its pin, not on the whole region).
+ */
+function ZoomToRegion({ region, hasPoint }: { region?: string; hasPoint: boolean }) {
+  const map = useMap()
+  const previous = useRef<string | undefined>(hasPoint ? region : undefined)
+
+  useEffect(() => {
+    if (!region || region === previous.current) return
+    previous.current = region
+    const bounds = REGION_BOUNDS[region]
+    if (!bounds) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    map.flyToBounds(bounds, { padding: [16, 16], animate: !reduceMotion, duration: 0.8 })
+  }, [map, region])
+
+  return null
 }
 
 function ClickToPlace({ onPlace }: { onPlace: (lat: number, lng: number) => void }) {

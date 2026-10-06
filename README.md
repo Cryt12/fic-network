@@ -1,4 +1,4 @@
-# Philippine Food Innovation Network
+# OneFIC - Philippine Food Innovation Network
 
 A web app for the network of Food Innovation Centers (FICs) in the Philippines. Members sign up, register their FIC with a geotag, and see every FIC on a shared map. A superadmin sees all entries and accounts, reviews login activity, and downloads filtered Excel reports.
 
