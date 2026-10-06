@@ -29,6 +29,7 @@ class EntryReport
 {
     private const LABELS = [
         'region_name' => 'Region',
+        'city' => 'City / Municipality',
         'name' => 'Name of FIC',
         'host_institution' => 'Host institution (university)',
         'products_developed' => 'Number of products developed',
@@ -43,7 +44,7 @@ class EntryReport
     ];
 
     /** Resource keys that are not columns (region_name is shown instead of the code). */
-    private const SKIP = ['id', 'region', 'is_mine', 'created_at', 'updated_at'];
+    private const SKIP = ['id', 'region', 'province_code', 'city_code', 'barangay_code', 'is_mine', 'created_at', 'updated_at'];
 
     /** Summed in the totals and per-region tables. */
     private const SUMS = [

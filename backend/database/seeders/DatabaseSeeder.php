@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(SuperadminSeeder::class);
+        $this->call(PlaceSeeder::class); // provinces / cities / barangays (reference data)
 
         if (app()->isLocal()) {
             $this->call(DemoUserSeeder::class);

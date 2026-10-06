@@ -16,6 +16,7 @@ class MapMarkerController extends Controller
     public function __invoke(): AnonymousResourceCollection
     {
         $entries = FicEntry::query()
+            ->without(['province', 'city', 'barangay'])
             ->select(['id', 'user_id', 'latitude', 'longitude', 'name', 'host_institution', 'region', 'lto_status'])
             ->get();
 

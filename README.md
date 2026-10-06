@@ -56,6 +56,7 @@ createdb fic_network
 createdb fic_network_test        # used by the test suite
 php artisan migrate
 php artisan db:seed --class=SuperadminSeeder
+php artisan db:seed --class=PlaceSeeder      # provinces, cities/municipalities, barangays (PSGC)
 ```
 
 > `php artisan db:seed` (without `--class`) also creates 12 demo members with sample entries when `APP_ENV=local`. Handy for trying the app; skip it for real data.
@@ -105,4 +106,4 @@ The Excel report picks the field up automatically; give it a nicer column headin
 - Proxy `/api`, `/sanctum` (and later `/storage`) to Laravel through PHP-FPM, on the same domain as the SPA.
 - In `backend/.env`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` and `FRONTEND_URL` set to your domain, `SANCTUM_STATEFUL_DOMAINS=your.domain`, `SESSION_SECURE_COOKIE=true`.
 - Use HTTPS: browsers only allow "Use my current location" on secure pages.
-- Run `php artisan migrate --force`, `php artisan db:seed --class=SuperadminSeeder --force`, and `php artisan optimize`.
+- Run `php artisan migrate --force`, `php artisan db:seed --class=SuperadminSeeder --force`, `php artisan db:seed --class=PlaceSeeder --force`, and `php artisan optimize`.

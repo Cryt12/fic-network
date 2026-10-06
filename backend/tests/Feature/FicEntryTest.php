@@ -5,16 +5,27 @@ namespace Tests\Feature;
 use App\Models\FicEntry;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\SeedsPlaces;
 use Tests\TestCase;
 
 class FicEntryTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, SeedsPlaces;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seedPlaces();
+    }
 
     public static function validEntry(array $overrides = []): array
     {
         return [
             'region' => 'XIII',
+            'province_code' => '160200000',
+            'city_code' => '160202000',
+            'barangay_code' => '160202007',
             'latitude' => 8.9475123,
             'longitude' => 125.5406456,
             'name' => 'Butuan Food Innovation Center',
@@ -41,6 +52,9 @@ class FicEntryTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('data.name', 'Butuan Food Innovation Center')
             ->assertJsonPath('data.region_name', 'Region XIII (Caraga)')
+            ->assertJsonPath('data.province', 'Agusan del Norte')
+            ->assertJsonPath('data.city', 'City of Butuan')
+            ->assertJsonPath('data.barangay', 'Ampayon')
             ->assertJsonPath('data.latitude', 8.9475123)
             ->assertJsonPath('data.assistance_types', ['product_development', 'packaging_labeling'])
             ->assertJsonPath('data.is_mine', true);
@@ -66,6 +80,9 @@ class FicEntryTest extends TestCase
             'latitude' => ['latitude' => 91],
             'longitude' => ['longitude' => -180.5],
             'region' => ['region' => 'XXI'],
+            'province_code' => ['province_code' => '070200000'], // Cebu is not in Caraga
+            'city_code' => ['city_code' => '160302000'], // Bayugan is not in Agusan del Norte
+            'barangay_code' => ['barangay_code' => '160302003'], // the Libertad in Bayugan, not Butuan
             'products_commercialized' => ['products_developed' => 3, 'products_commercialized' => 4],
             'lto_status' => ['lto_status' => 'expired'],
             'msmes_served' => ['msmes_served' => -1],

@@ -11,6 +11,8 @@ export function formatField(entry: Pick<FicEntry, 'region_name'> & Partial<FicEn
   switch (input.kind) {
     case 'region':
       return entry.region_name
+    case 'place':
+      return entry[input.level] ?? 'Not set'
     case 'geotag':
     case 'geotag-pair':
       return typeof value === 'number' ? String(Number(value.toFixed(7))) : ''

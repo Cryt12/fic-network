@@ -6,6 +6,10 @@ import { ENTRY_FIELD_KEYS, type EntryValues, type OptionalTextKey } from '@/feat
 export type FicEntry = Omit<EntryValues, OptionalTextKey> & { [K in OptionalTextKey]: string | null } & {
   id: number
   region_name: string
+  /** Names for the *_code place fields (null on entries made before addresses existed). */
+  province: string | null
+  city: string | null
+  barangay: string | null
   is_mine: boolean
   created_at: string
   updated_at: string
@@ -33,6 +37,37 @@ export function useRegions() {
     queryKey: ['regions'],
     queryFn: async () => (await api<{ data: Region[] }>('/regions')).data,
     staleTime: Infinity,
+  })
+}
+
+export type PlaceOption = { code: string; name: string }
+
+/** Provinces of a region ({ region }) or the children of a place ({ parent }). */
+export function usePlaces(filter: { region: string } | { parent: string }, enabled: boolean) {
+  const params = new URLSearchParams(filter)
+  return useQuery({
+    queryKey: ['places', params.toString()],
+    queryFn: async () => (await api<{ data: PlaceOption[] }>(`/places?${params}`)).data,
+    enabled,
+    staleTime: Infinity,
+  })
+}
+
+export type PlaceLocation = {
+  latitude: number
+  longitude: number
+  bounds: [[number, number], [number, number]] | null
+  /** True when the place itself isn't on the map and this is its city/province instead. */
+  approximate: boolean
+}
+
+export function usePlaceLocation(code: string) {
+  return useQuery({
+    queryKey: ['place-location', code],
+    queryFn: async () => (await api<{ data: PlaceLocation | null }>(`/places/${code}/location`)).data,
+    enabled: code !== '',
+    staleTime: Infinity,
+    retry: 1,
   })
 }
 

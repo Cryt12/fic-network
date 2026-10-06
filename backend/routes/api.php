@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FicEntryController;
 use App\Http\Controllers\Api\MapMarkerController;
+use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\Api\RecentLoginController;
 use App\Http\Controllers\Api\RegionController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,9 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('regions', RegionController::class);
+Route::get('places', [PlaceController::class, 'index'])->middleware('throttle:120,1');
+// Each lookup may call OpenStreetMap, so this one is throttled harder.
+Route::get('places/{place}/location', [PlaceController::class, 'location'])->middleware('throttle:30,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('recent-logins', RecentLoginController::class);

@@ -6,11 +6,19 @@ use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\FicEntryTest;
+use Tests\SeedsPlaces;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, SeedsPlaces;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seedPlaces();
+    }
 
     private function payload(array $overrides = []): array
     {

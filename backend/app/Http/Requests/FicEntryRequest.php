@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\AssistanceType;
 use App\Enums\LtoStatus;
 use App\Models\FicEntry;
+use App\Rules\PlaceRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -51,6 +52,9 @@ class FicEntryRequest extends FormRequest
 
         return [
             $prefix.'region' => ['required', 'string', Rule::in(array_keys(config('regions')))],
+            $prefix.'province_code' => ['required', 'string', new PlaceRule('province', $prefix.'region')],
+            $prefix.'city_code' => ['required', 'string', new PlaceRule('city', $prefix.'province_code')],
+            $prefix.'barangay_code' => ['required', 'string', new PlaceRule('barangay', $prefix.'city_code')],
             $prefix.'latitude' => ['required', 'numeric', 'between:-90,90'],
             $prefix.'longitude' => ['required', 'numeric', 'between:-180,180'],
             $prefix.'name' => ['required', 'string', 'max:255'],

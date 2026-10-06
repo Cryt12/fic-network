@@ -22,6 +22,9 @@ class FicEntry extends Model
     /** @use HasFactory<FicEntryFactory> */
     use HasFactory, SoftDeletes;
 
+    /** Address names are shown wherever an entry is. */
+    protected $with = ['province:code,name', 'city:code,name', 'barangay:code,name'];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -50,6 +53,30 @@ class FicEntry extends Model
                 $entry->assistance_other = null;
             }
         });
+    }
+
+    /**
+     * @return BelongsTo<Place, $this>
+     */
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Place::class, 'province_code');
+    }
+
+    /**
+     * @return BelongsTo<Place, $this>
+     */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(Place::class, 'city_code');
+    }
+
+    /**
+     * @return BelongsTo<Place, $this>
+     */
+    public function barangay(): BelongsTo
+    {
+        return $this->belongsTo(Place::class, 'barangay_code');
     }
 
     /**

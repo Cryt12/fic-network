@@ -36,6 +36,8 @@ type Option = { readonly value: string; readonly label: string }
 /** How a field is entered. Some kinds render together (the geotag pair, checkboxes + "other"). */
 export type FieldInput =
   | { kind: 'region' }
+  // PSGC place picker; options depend on its parent field (region, province, city).
+  | { kind: 'place'; level: 'province' | 'city' | 'barangay'; parent: string }
   | { kind: 'geotag' } // renders the map picker for latitude + longitude
   | { kind: 'geotag-pair' } // longitude: rendered by the latitude's picker
   | { kind: 'text'; maxLength: number }
@@ -82,6 +84,28 @@ export const ENTRY_FIELDS = {
     input: { kind: 'region' },
     schema: z.string().min(1, 'Select a region.'),
     showIn: { popup: true, table: true, preview: true },
+  },
+  province_code: {
+    label: 'Province',
+    section: 'location',
+    input: { kind: 'place', level: 'province', parent: 'region' },
+    schema: z.string().min(1, 'Select a province.'),
+    showIn: { preview: true },
+  },
+  city_code: {
+    label: 'City / Municipality',
+    shortLabel: 'City / Municipality',
+    section: 'location',
+    input: { kind: 'place', level: 'city', parent: 'province_code' },
+    schema: z.string().min(1, 'Select a city or municipality.'),
+    showIn: { table: true, preview: true },
+  },
+  barangay_code: {
+    label: 'Barangay',
+    section: 'location',
+    input: { kind: 'place', level: 'barangay', parent: 'city_code' },
+    schema: z.string().min(1, 'Select a barangay.'),
+    showIn: { preview: true },
   },
   latitude: {
     label: 'Latitude',
@@ -193,10 +217,19 @@ export type EntryFieldKey = keyof typeof ENTRY_FIELDS
 
 export const ENTRY_FIELD_KEYS = Object.keys(ENTRY_FIELDS) as EntryFieldKey[]
 
-/** Optional free-text fields: the API returns null when they're empty. */
+/** Fields the API can return as null: optional text, and addresses on entries made before they existed. */
 export type OptionalTextKey = {
-  [K in EntryFieldKey]: (typeof ENTRY_FIELDS)[K]['input']['kind'] extends 'textarea' | 'checkboxes-other' ? K : never
+  [K in EntryFieldKey]: (typeof ENTRY_FIELDS)[K]['input']['kind'] extends 'textarea' | 'checkboxes-other' | 'place' ? K : never
 }[EntryFieldKey]
+
+/** Place fields that depend on `key` (directly or further down), e.g. region -> province, city, barangay. */
+export function dependentPlaceFields(key: string): EntryFieldKey[] {
+  const direct = ENTRY_FIELD_KEYS.filter((k) => {
+    const input: FieldInput = ENTRY_FIELDS[k].input
+    return input.kind === 'place' && input.parent === key
+  })
+  return direct.flatMap((k) => [k, ...dependentPlaceFields(k)])
+}
 
 type Shape = { [K in EntryFieldKey]: (typeof ENTRY_FIELDS)[K]['schema'] }
 const shape = Object.fromEntries(ENTRY_FIELD_KEYS.map((key) => [key, ENTRY_FIELDS[key].schema])) as Shape
@@ -219,6 +252,9 @@ export type EntryValues = z.infer<typeof entrySchema>
 /** Empty form. Counts start blank (not 0) so nobody submits a guess by accident. */
 export const EMPTY_ENTRY = {
   region: '',
+  province_code: '',
+  city_code: '',
+  barangay_code: '',
   name: '',
   host_institution: '',
   msmes_needing_fabrication_details: '',
