@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Session (cookie) auth for the SPA. Every successful login, including the one
@@ -21,7 +21,12 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create($request->validated());
+        $user = DB::transaction(function () use ($request) {
+            $user = User::create($request->safe()->only(['name', 'email', 'password']));
+            $user->ficEntries()->create($request->validated('entry'));
+
+            return $user;
+        });
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
@@ -31,12 +36,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): UserResource
     {
-        if (! Auth::guard('web')->attempt($request->validated())) {
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
-        }
-
+        $request->authenticate();
         $request->session()->regenerate();
 
         return new UserResource($request->user());

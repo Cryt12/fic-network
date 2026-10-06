@@ -3,16 +3,28 @@ import { AppShell } from '@/app/AppShell'
 import { ComingSoonPage } from '@/app/ComingSoonPage'
 import { AdminRoute, GuestRoute, ProtectedRoute } from '@/app/guards'
 import { NotFoundPage } from '@/app/NotFoundPage'
+import { AdminEntriesPage } from '@/features/admin/AdminEntriesPage'
+import { AdminLayout } from '@/features/admin/AdminLayout'
+import { AdminUserDetailPage } from '@/features/admin/AdminUserDetailPage'
+import { AdminUsersPage } from '@/features/admin/AdminUsersPage'
+import { AuthLayout } from '@/features/auth/AuthLayout'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { EditEntryPage, NewEntryPage } from '@/features/entries/EntryFormPages'
+import { MyEntriesPage } from '@/features/entries/MyEntriesPage'
 
 export const router = createBrowserRouter([
   {
     element: <GuestRoute />,
     children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: '/login', element: <LoginPage /> },
+          { path: '/register', element: <RegisterPage /> },
+        ],
+      },
     ],
   },
   {
@@ -22,13 +34,23 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: 'entries', element: <ComingSoonPage title="My Entries" phase={3} /> },
-          { path: 'entries/new', element: <ComingSoonPage title="Add New Entry" phase={3} /> },
+          { path: 'entries', element: <MyEntriesPage /> },
+          { path: 'entries/new', element: <NewEntryPage /> },
+          { path: 'entries/:id/edit', element: <EditEntryPage /> },
           { path: 'profile', element: <ComingSoonPage title="My Profile" phase={5} /> },
           {
             path: 'admin',
             element: <AdminRoute />,
-            children: [{ index: true, element: <ComingSoonPage title="Admin Panel" phase={6} /> }],
+            children: [
+              {
+                element: <AdminLayout />,
+                children: [
+                  { index: true, element: <AdminEntriesPage /> },
+                  { path: 'users', element: <AdminUsersPage /> },
+                  { path: 'users/:id', element: <AdminUserDetailPage /> },
+                ],
+              },
+            ],
           },
           { path: '*', element: <NotFoundPage /> },
         ],

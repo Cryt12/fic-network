@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { FieldGroup } from '@/components/ui/field'
 import { useLogin } from '@/features/auth/api'
-import { AuthLayout } from '@/features/auth/AuthLayout'
+import { AuthPanel } from '@/features/auth/AuthLayout'
 import { loginSchema, type LoginValues } from '@/features/auth/schemas'
 import { ApiError, errorMessage } from '@/lib/api'
 import { useDocumentTitle } from '@/lib/use-document-title'
@@ -44,9 +44,9 @@ export function LoginPage() {
   })
 
   return (
-    <AuthLayout
+    <AuthPanel
       title="Log in"
-      subtitle="Food Innovation Centers across Caraga, on one map."
+      subtitle="Food Innovation Centers across the Philippines, on one map."
       footer={
         <>
           New here?{' '}
@@ -86,6 +86,6 @@ export function LoginPage() {
           </Button>
         </FieldGroup>
       </form>
-    </AuthLayout>
+    </AuthPanel>
   )
 }

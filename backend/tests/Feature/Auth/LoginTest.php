@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\FailedLoginAttempt;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -58,7 +59,7 @@ class LoginTest extends TestCase
         $this->assertDatabaseCount('login_activities', 0);
     }
 
-    public function test_login_attempts_are_rate_limited(): void
+    public function test_five_wrong_passwords_block_login_without_saying_how_many_are_allowed(): void
     {
         $user = User::factory()->create();
 
@@ -67,12 +68,62 @@ class LoginTest extends TestCase
                 ->assertUnprocessable();
         }
 
-        // Even the right password is refused until the window passes.
-        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])
+        // Even the right password is refused until the block expires.
+        $response = $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])
             ->assertTooManyRequests()
             ->assertHeader('Retry-After');
 
+        $this->assertMatchesRegularExpression('/^Too many login attempts\. Try again in \d+ seconds\.$/', $response->json('message'));
         $this->assertGuest('web');
+
+        $this->travel(61)->seconds();
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+    }
+
+    public function test_successful_logins_do_not_use_up_attempts(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'wrong-password']);
+        }
+        $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'password'])->assertOk();
+        $this->postJson('/api/auth/logout')->assertNoContent();
+
+        // The success reset the count, so four more mistakes are still allowed.
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'wrong-password'])->assertUnprocessable();
+        }
+    }
+
+    public function test_failed_attempts_are_recorded_without_the_password(): void
+    {
+        $user = User::factory()->create(['email' => 'juan@example.com']);
+
+        $this->withHeader('User-Agent', 'FIC Test Browser')
+            ->postJson('/api/auth/login', ['email' => 'Juan@Example.com', 'password' => 'not-my-password']);
+        $this->postJson('/api/auth/login', ['email' => 'nobody@example.com', 'password' => 'whatever-123']);
+
+        $this->assertDatabaseHas('failed_login_attempts', [
+            'user_id' => $user->id, 'email' => 'juan@example.com', 'reason' => 'wrong_password', 'user_agent' => 'FIC Test Browser',
+        ]);
+        $this->assertDatabaseHas('failed_login_attempts', ['user_id' => null, 'email' => 'nobody@example.com', 'reason' => 'unknown_email']);
+
+        $stored = json_encode(FailedLoginAttempt::all()->toArray());
+        $this->assertStringNotContainsString('not-my-password', $stored);
+        $this->assertStringNotContainsString('whatever-123', $stored);
+    }
+
+    public function test_tries_while_blocked_are_recorded_as_locked_out(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 7; $i++) {
+            $this->postJson('/api/auth/login', ['email' => $user->email, 'password' => 'wrong-password']);
+        }
+
+        $this->assertSame(5, $user->failedLoginAttempts()->where('reason', 'wrong_password')->count());
+        $this->assertSame(2, $user->failedLoginAttempts()->where('reason', 'locked_out')->count());
     }
 
     public function test_user_can_log_out(): void

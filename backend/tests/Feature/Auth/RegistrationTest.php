@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\FicEntryTest;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -18,6 +19,7 @@ class RegistrationTest extends TestCase
             'email' => 'maria@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
+            'entry' => FicEntryTest::validEntry(),
             ...$overrides,
         ];
     }
@@ -34,6 +36,20 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticatedAs($user, 'web');
         $this->assertSame(Role::User, $user->role);
         $this->assertSame(1, $user->loginActivities()->count());
+        $this->assertSame('Butuan Food Innovation Center', $user->ficEntries()->sole()->name);
+    }
+
+    public function test_signup_requires_valid_fic_details_and_creates_nothing_otherwise(): void
+    {
+        $this->postJson('/api/auth/register', $this->payload(['entry' => FicEntryTest::validEntry(['latitude' => 200, 'name' => ''])]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['entry.latitude', 'entry.name']);
+
+        $this->postJson('/api/auth/register', $this->payload(['entry' => null]))
+            ->assertJsonValidationErrors(['entry.region', 'entry.latitude', 'entry.lto_status']);
+
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('fic_entries', 0);
     }
 
     public function test_role_cannot_be_chosen_at_signup(): void

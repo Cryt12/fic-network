@@ -5,11 +5,8 @@ import { RouterProvider } from 'react-router/dom'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { router } from '@/app/router'
-import { syncColorSchemeClass } from '@/lib/color-scheme'
 import { queryClient } from '@/lib/query-client'
 import './index.css'
-
-syncColorSchemeClass()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

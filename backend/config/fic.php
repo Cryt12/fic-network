@@ -4,6 +4,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Local Timezone
+    |--------------------------------------------------------------------------
+    |
+    | The timezone people think in. Timestamps are stored in UTC; this is used
+    | for report timestamps and for the "submitted from / to" date filters.
+    |
+    */
+
+    'timezone' => env('FIC_TIMEZONE', 'Asia/Manila'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Superadmin Account
     |--------------------------------------------------------------------------
     |

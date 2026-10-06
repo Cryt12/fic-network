@@ -61,6 +61,22 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<FicEntry, $this>
+     */
+    public function ficEntries(): HasMany
+    {
+        return $this->hasMany(FicEntry::class);
+    }
+
+    /**
+     * @return HasMany<FailedLoginAttempt, $this>
+     */
+    public function failedLoginAttempts(): HasMany
+    {
+        return $this->hasMany(FailedLoginAttempt::class);
+    }
+
+    /**
      * @return HasMany<LoginActivity, $this>
      */
     public function loginActivities(): HasMany

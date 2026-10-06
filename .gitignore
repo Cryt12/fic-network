@@ -1,0 +1,12 @@
+# Each app has its own .gitignore (backend/.gitignore, frontend/.gitignore).
+
+# Local AI-assistant tooling (installed skills), not part of the app.
+.agents/
+.claude/
+skills-lock.json
+
+# OS / editor clutter
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

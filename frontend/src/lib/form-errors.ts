@@ -12,7 +12,9 @@ export function applyServerErrors<T extends FieldValues>(
 ): string | null {
   if (error instanceof ApiError && error.status === 422) {
     let unmatched: string | null = null
-    for (const [field, messages] of Object.entries(error.errors)) {
+    for (const [rawField, messages] of Object.entries(error.errors)) {
+      // "assistance_types.0" (an array item) belongs to the "assistance_types" input.
+      const field = rawField.replace(/\.\d+$/, '')
       if ((fields as readonly string[]).includes(field)) {
         setError(field as Path<T>, { type: 'server', message: messages[0] })
       } else {
@@ -22,4 +24,13 @@ export function applyServerErrors<T extends FieldValues>(
     return unmatched
   }
   return errorMessage(error)
+}
+
+/** Brings the first invalid input into view (after a server-side 422 on a long form). */
+export function scrollToFirstError(): void {
+  requestAnimationFrame(() => {
+    const invalid = document.querySelector<HTMLElement>('[aria-invalid="true"]')
+    invalid?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    invalid?.focus({ preventScroll: true })
+  })
 }
