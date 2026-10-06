@@ -1,4 +1,4 @@
-import { FilePlus2, LayoutList, LogOut, Map as MapIcon, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
+import { ChartColumn, FilePlus2, LayoutList, LogOut, Map as MapIcon, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean }
 
 const NAV: NavItem[] = [
   { to: '/', label: 'Map', icon: MapIcon, end: true },
+  { to: '/summary', label: 'Summary', icon: ChartColumn },
   { to: '/entries', label: 'My Entries', icon: LayoutList, end: true },
   { to: '/entries/new', label: 'Add New Entry', icon: FilePlus2 },
   { to: '/profile', label: 'My Profile', icon: UserRound },

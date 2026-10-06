@@ -13,6 +13,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { EditEntryPage, NewEntryPage } from '@/features/entries/EntryFormPages'
 import { MyEntriesPage } from '@/features/entries/MyEntriesPage'
+import { SummaryPage } from '@/features/summary/SummaryPage'
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { index: true, element: <DashboardPage /> },
+          { path: 'summary', element: <SummaryPage /> },
           { path: 'entries', element: <MyEntriesPage /> },
           { path: 'entries/new', element: <NewEntryPage /> },
           { path: 'entries/:id/edit', element: <EditEntryPage /> },

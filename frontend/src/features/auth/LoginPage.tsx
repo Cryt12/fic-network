@@ -57,7 +57,7 @@ export function LoginPage() {
       }
     >
       <form onSubmit={onSubmit} noValidate>
-        <FieldGroup>
+        <FieldGroup className="gap-5">
           {formError && (
             <Alert variant="destructive">
               <CircleAlert />

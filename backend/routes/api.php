@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MapMarkerController;
 use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\Api\RecentLoginController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\SummaryController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('my/entries', [FicEntryController::class, 'mine']);
     Route::apiResource('entries', FicEntryController::class)->except('index');
     Route::get('map/markers', MapMarkerController::class);
+    Route::get('summary', SummaryController::class);
 });
 
 // Superadmin only. The gate is checked on the server for every request here.

@@ -97,7 +97,7 @@ export function RegisterPage() {
         )
       }
     >
-      <ol className="mb-8 grid grid-cols-3 gap-2" aria-label="Signup steps">
+      <ol className="mb-6 grid grid-cols-3 gap-2" aria-label="Signup steps">
         {STEPS.map((s, i) => (
           <li key={s.title} aria-current={i === stepIndex ? 'step' : undefined} className="flex flex-col gap-1.5">
             <span className={cn('h-1 rounded-full transition-colors duration-300', i <= stepIndex ? 'bg-primary' : 'bg-border')} />
@@ -125,7 +125,7 @@ export function RegisterPage() {
 
         <div key={stepIndex} className="auth-panel-enter">
           {step.sections.length === 0 ? (
-            <FieldGroup>
+            <FieldGroup className="gap-5">
               <TextField
                 id="name"
                 label="Name"
@@ -158,7 +158,7 @@ export function RegisterPage() {
           )}
         </div>
 
-        <div className="mt-8 flex gap-2">
+        <div className="mt-6 flex gap-2">
           {stepIndex > 0 && (
             <Button type="button" variant="outline" size="lg" onClick={() => goTo(stepIndex - 1)} disabled={register.isPending}>
               <ArrowLeft data-icon="inline-start" />
