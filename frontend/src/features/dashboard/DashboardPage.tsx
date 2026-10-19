@@ -15,6 +15,8 @@ import { FlyTo, type FlyTarget } from '@/features/map/FlyTo'
 import { REGION_BOUNDS } from '@/features/map/region-bounds'
 import { useSummary } from '@/features/summary/api'
 import { RegionBreakdown } from '@/features/summary/RegionBreakdown'
+import { AssistanceChart } from '@/features/summary/AssistanceChart'
+import { EquipmentChart } from '@/features/summary/EquipmentChart'
 import { RegionCharts } from '@/features/summary/RegionCharts'
 import { SummaryStrip } from '@/features/summary/SummaryStrip'
 import { errorMessage } from '@/lib/api'
@@ -144,6 +146,8 @@ export function DashboardPage() {
 
         <div className="px-3 pt-6 pb-8 sm:px-4">
           <RegionCharts regions={summary.data?.regions} isPending={summary.isPending} />
+          <AssistanceChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
+          <EquipmentChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
         </div>
       </main>
 

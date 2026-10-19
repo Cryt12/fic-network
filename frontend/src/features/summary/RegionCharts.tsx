@@ -20,7 +20,7 @@ const fullName = (_: unknown, payload: readonly { payload?: RegionSummary }[]) =
 export function RegionCharts({ regions, isPending }: { regions: RegionSummary[] | undefined; isPending: boolean }) {
   if (isPending || !regions) {
     return (
-      <div className="grid gap-6 xl:grid-cols-2" aria-busy="true" aria-label="Loading charts">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2" aria-busy="true" aria-label="Loading charts">
         {Array.from({ length: 2 }, (_, i) => (
           <div key={i} className="rounded-lg border bg-card p-4">
             <Skeleton className="h-5 w-40" />
@@ -32,44 +32,68 @@ export function RegionCharts({ regions, isPending }: { regions: RegionSummary[] 
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
       <ChartCard title="FICs per region" description="Number of Food Innovation Centers in each region.">
-        <ChartContainer config={ficsConfig} className="h-72 w-full">
-          <BarChart data={regions} margin={{ top: 20, right: 4, left: -20, bottom: 0 }}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={44} fontSize={11} />
-            <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent labelFormatter={fullName} />} />
-            <Bar dataKey="fics" fill="var(--color-fics)" radius={[4, 4, 0, 0]} maxBarSize={36}>
-              {/* Value on top of each bar that has one; zeros stay unlabeled. */}
-              <LabelList dataKey="fics" position="top" fontSize={11} className="fill-foreground" formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')} />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+        <ScrollX>
+          <ChartContainer config={ficsConfig} className="h-72 w-full min-w-[520px]">
+            <BarChart data={regions} margin={{ top: 20, right: 4, left: -20, bottom: 0 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={44} fontSize={11} />
+              <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent labelFormatter={fullName} />} />
+              <Bar dataKey="fics" fill="var(--color-fics)" radius={[4, 4, 0, 0]} maxBarSize={36}>
+                {/* Value on top of each bar that has one; zeros stay unlabeled. */}
+                <LabelList dataKey="fics" position="top" fontSize={11} className="fill-foreground" formatter={(v: unknown) => (Number(v) > 0 ? String(v) : '')} />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </ScrollX>
       </ChartCard>
 
       <ChartCard title="Products per region" description="Products developed, and how many of them were commercialized.">
-        <ChartContainer config={productsConfig} className="h-72 w-full">
-          <BarChart data={regions} margin={{ top: 20, right: 4, left: -20, bottom: 0 }} barGap={2}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={44} fontSize={11} />
-            <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent labelFormatter={fullName} />} />
-            <ChartLegend content={<ChartLegendContent />} verticalAlign="top" />
-            <Bar dataKey="products_developed" fill="var(--color-products_developed)" radius={[4, 4, 0, 0]} maxBarSize={22} />
-            <Bar dataKey="products_commercialized" fill="var(--color-products_commercialized)" radius={[4, 4, 0, 0]} maxBarSize={22} />
-          </BarChart>
-        </ChartContainer>
+        <ScrollX>
+          <ChartContainer config={productsConfig} className="h-72 w-full min-w-[520px]">
+            <BarChart data={regions} margin={{ top: 20, right: 4, left: 0, bottom: 0 }} barGap={2}>
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={40} fontSize={11} />
+              <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent labelFormatter={fullName} />} />
+              <ChartLegend content={<ChartLegendContent />} verticalAlign="top" />
+              <Bar dataKey="products_developed" fill="var(--color-products_developed)" radius={[4, 4, 0, 0]} maxBarSize={22} />
+              <Bar dataKey="products_commercialized" fill="var(--color-products_commercialized)" radius={[4, 4, 0, 0]} maxBarSize={22} />
+            </BarChart>
+          </ChartContainer>
+        </ScrollX>
       </ChartCard>
     </div>
   )
 }
 
-function ChartCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+export function ScrollX({ children }: { children: React.ReactNode }) {
+  return <div className="-mx-1 overflow-x-auto px-1">{children}</div>
+}
+
+export function ChartCard({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: string
+  description: string
+  /** Controls beside the title, e.g. view tabs. */
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
     <section className="rounded-lg border bg-card p-4 sm:p-5">
-      <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-      <p className="mt-0.5 mb-4 text-sm text-muted-foreground">{description}</p>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+        </div>
+        {action}
+      </div>
       {children}
     </section>
   )
