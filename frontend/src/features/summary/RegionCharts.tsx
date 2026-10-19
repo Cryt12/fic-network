@@ -35,7 +35,7 @@ export function RegionCharts({ regions, isPending }: { regions: RegionSummary[] 
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
       <ChartCard title="FICs per region" description="Number of Food Innovation Centers in each region.">
         <ScrollX>
-          <ChartContainer config={ficsConfig} className="h-72 w-full min-w-[520px]">
+          <ChartContainer config={ficsConfig} className="h-72 w-full min-w-[460px]">
             <BarChart data={regions} margin={{ top: 20, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
@@ -52,7 +52,7 @@ export function RegionCharts({ regions, isPending }: { regions: RegionSummary[] 
 
       <ChartCard title="Products per region" description="Products developed, and how many of them were commercialized.">
         <ScrollX>
-          <ChartContainer config={productsConfig} className="h-72 w-full min-w-[520px]">
+          <ChartContainer config={productsConfig} className="h-72 w-full min-w-[460px]">
             <BarChart data={regions} margin={{ top: 20, right: 4, left: 0, bottom: 0 }} barGap={2}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />

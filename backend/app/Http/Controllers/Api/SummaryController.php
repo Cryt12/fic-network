@@ -7,6 +7,7 @@ use App\Enums\EquipmentOperation;
 use App\Enums\EquipmentUtilization;
 use App\Http\Controllers\Controller;
 use App\Models\FicEntry;
+use App\Models\MsmeReport;
 use App\Reports\EntryReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\DB;
  * Network-wide totals for the Summary dashboard: national figures and one row per region
  * (every region, including those with no FICs yet), plus how many FICs report each type of
  * assistance requested by MSMEs, nationally and per region, and how much listed equipment is in
- * each operation / utilization status per region. Aggregates only, no personal data.
+ * each operation / utilization status per region, plus the Food MSME partners reported by DOST
+ * FIC Focal accounts (the sum of every report per region). Aggregates only, no personal data.
  */
 class SummaryController extends Controller
 {
@@ -48,6 +50,13 @@ class SummaryController extends Controller
             ->get()
             ->groupBy('region');
 
+        $msmes = MsmeReport::query()
+            ->toBase()
+            ->selectRaw('region, sum(msme_partners) as msme_partners, sum(msmes_with_lto) as msmes_with_lto')
+            ->groupBy('region')
+            ->get()
+            ->keyBy('region');
+
         $regions = collect(config('regions'))->map(fn (string $name, string $code) => [
             'code' => $code,
             'name' => $name,
@@ -58,6 +67,8 @@ class SummaryController extends Controller
                 $type->value => (int) ($assistance[$code][$type->value] ?? 0),
             ]),
             'equipment' => self::equipmentCounts($equipment[$code] ?? collect()),
+            'msme_partners' => (int) ($msmes[$code]->msme_partners ?? 0),
+            'msmes_with_lto' => (int) ($msmes[$code]->msmes_with_lto ?? 0),
         ])->values();
 
         return response()->json(['data' => [
@@ -67,6 +78,8 @@ class SummaryController extends Controller
                 'products_commercialized' => $regions->sum('products_commercialized'),
                 'regions_with_fics' => $regions->where('fics', '>', 0)->count(),
                 'equipment' => $regions->sum(fn (array $r) => array_sum($r['equipment']['operation'])),
+                'msme_partners' => $regions->sum('msme_partners'),
+                'msmes_with_lto' => $regions->sum('msmes_with_lto'),
             ],
             'regions' => $regions,
             'assistance' => EntryReport::assistanceCounts(FicEntry::query()),

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/app/AppShell'
 import { ComingSoonPage } from '@/app/ComingSoonPage'
-import { AdminRoute, CanAddEntriesRoute, GuestRoute, ProtectedRoute, ViewAllEntriesRoute } from '@/app/guards'
+import { AdminRoute, CanAddEntriesRoute, CanAddMsmeReportsRoute, GuestRoute, ProtectedRoute, ViewAllEntriesRoute } from '@/app/guards'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { AdminEntriesPage } from '@/features/admin/AdminEntriesPage'
 import { AdminLayout } from '@/features/admin/AdminLayout'
@@ -13,6 +13,8 @@ import { RegisterPage } from '@/features/auth/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { EditEntryPage, NewEntryPage } from '@/features/entries/EntryFormPages'
 import { MyEntriesPage } from '@/features/entries/MyEntriesPage'
+import { EditMsmeReportPage, NewMsmeReportPage } from '@/features/msme-reports/MsmeReportFormPages'
+import { MyMsmeReportsPage } from '@/features/msme-reports/MyMsmeReportsPage'
 import { SummaryPage } from '@/features/summary/SummaryPage'
 
 export const router = createBrowserRouter([
@@ -42,6 +44,15 @@ export const router = createBrowserRouter([
               { path: 'entries', element: <MyEntriesPage /> },
               { path: 'entries/new', element: <NewEntryPage /> },
               { path: 'entries/:id/edit', element: <EditEntryPage /> },
+            ],
+          },
+          {
+            // DOST FIC Focal accounts: Food MSME partners in their region (their only entries).
+            element: <CanAddMsmeReportsRoute />,
+            children: [
+              { path: 'msme-reports', element: <MyMsmeReportsPage /> },
+              { path: 'msme-reports/new', element: <NewMsmeReportPage /> },
+              { path: 'msme-reports/:id/edit', element: <EditMsmeReportPage /> },
             ],
           },
           {

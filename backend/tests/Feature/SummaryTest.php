@@ -26,7 +26,7 @@ class SummaryTest extends TestCase
 
         $data = $this->actingAs(User::factory()->create())->getJson('/api/summary')->assertOk()->json('data');
 
-        $this->assertSame(['fics' => 3, 'products_developed' => 19, 'products_commercialized' => 5, 'regions_with_fics' => 2, 'equipment' => 0], $data['national']);
+        $this->assertSame(['fics' => 3, 'products_developed' => 19, 'products_commercialized' => 5, 'regions_with_fics' => 2, 'equipment' => 0, 'msme_partners' => 0, 'msmes_with_lto' => 0], $data['national']);
         $this->assertCount(count(config('regions')), $data['regions']); // every region, even with no FICs
 
         $regions = collect($data['regions'])->keyBy('code');

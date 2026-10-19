@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FicEntryController;
 use App\Http\Controllers\Api\MapMarkerController;
+use App\Http\Controllers\Api\MsmeReportController;
 use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\Api\RecentLoginController;
 use App\Http\Controllers\Api\RegionController;
@@ -33,6 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('my/entries', [FicEntryController::class, 'mine']);
     Route::apiResource('entries', FicEntryController::class)->except('index');
     Route::get('map/markers', MapMarkerController::class);
+
+    // DOST FIC Focal accounts: Food MSME partners in their region.
+    Route::get('my/msme-reports', [MsmeReportController::class, 'mine']);
+    Route::apiResource('msme-reports', MsmeReportController::class)->except('index');
     Route::get('summary', SummaryController::class);
 });
 

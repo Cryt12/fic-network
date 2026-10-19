@@ -16,6 +16,8 @@ export type User = {
   is_focal: boolean
   can_view_all_entries: boolean
   can_add_entries: boolean
+  /** DOST FIC Focal accounts report Food MSME partners for their region. */
+  can_add_msme_reports: boolean
   region_name: string | null
   position: string | null
   dost_unit: string | null

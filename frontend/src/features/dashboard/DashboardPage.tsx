@@ -17,13 +17,14 @@ import { useSummary } from '@/features/summary/api'
 import { RegionBreakdown } from '@/features/summary/RegionBreakdown'
 import { AssistanceChart } from '@/features/summary/AssistanceChart'
 import { EquipmentChart } from '@/features/summary/EquipmentChart'
+import { MsmePartnersChart } from '@/features/summary/MsmePartnersChart'
 import { RegionCharts } from '@/features/summary/RegionCharts'
 import { SummaryStrip } from '@/features/summary/SummaryStrip'
 import { errorMessage } from '@/lib/api'
 import { useDocumentTitle } from '@/lib/use-document-title'
 
 export function DashboardPage() {
-  useDocumentTitle('Map')
+  useDocumentTitle('Dashboard')
   const markers = useMapMarkers()
   const summary = useSummary()
   const user = useCurrentUser()
@@ -146,6 +147,7 @@ export function DashboardPage() {
 
         <div className="px-3 pt-6 pb-8 sm:px-4">
           <RegionCharts regions={summary.data?.regions} isPending={summary.isPending} />
+          <MsmePartnersChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
           <AssistanceChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
           <EquipmentChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
         </div>

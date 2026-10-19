@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\MsmeReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -28,6 +29,7 @@ class UserResource extends JsonResource
             'is_focal' => $this->isFocal(),
             'can_view_all_entries' => $this->canViewAllEntries(),
             'can_add_entries' => ! $this->isFocal(),
+            'can_add_msme_reports' => $this->can('create', MsmeReport::class),
             'region' => $this->region,
             'region_name' => $this->region ? config("regions.{$this->region}") : null,
             'position' => $this->position,

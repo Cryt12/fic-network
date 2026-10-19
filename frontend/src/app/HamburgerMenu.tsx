@@ -1,4 +1,4 @@
-import { Building2, ChartColumn, Database, FilePlus2, LayoutList, LogOut, Map as MapIcon, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
+import { Building2, ChartColumn, Database, FilePlus2, LayoutList, LogOut, LayoutDashboard, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -15,10 +15,13 @@ type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; sho
 
 // Links follow the account's abilities; the API and route guards enforce the same rules.
 const NAV: NavItem[] = [
-  { to: '/', label: 'Map', icon: MapIcon, end: true },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/summary', label: 'Summary', icon: ChartColumn },
   { to: '/entries', label: 'My Entries', icon: LayoutList, end: true, show: (u) => u.can_add_entries },
   { to: '/entries/new', label: 'Add New Entry', icon: FilePlus2, show: (u) => u.can_add_entries },
+  // DOST FIC Focal accounts' own entries: Food MSME partners in their region.
+  { to: '/msme-reports', label: 'My Entries', icon: LayoutList, end: true, show: (u) => u.can_add_msme_reports },
+  { to: '/msme-reports/new', label: 'Add New Entry', icon: FilePlus2, show: (u) => u.can_add_msme_reports },
   { to: '/data', label: 'All FIC Data', icon: Database, show: (u) => u.is_focal },
   { to: '/profile', label: 'My Profile', icon: UserRound },
   { to: '/admin', label: 'Admin Panel', icon: ShieldCheck, show: (u) => u.is_superadmin },

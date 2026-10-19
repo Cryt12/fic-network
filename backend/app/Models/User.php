@@ -80,6 +80,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Food MSME partner reports (DOST FIC Focal accounts only).
+     *
+     * @return HasMany<MsmeReport, $this>
+     */
+    public function msmeReports(): HasMany
+    {
+        return $this->hasMany(MsmeReport::class);
+    }
+
+    /**
      * @return HasMany<FailedLoginAttempt, $this>
      */
     public function failedLoginAttempts(): HasMany

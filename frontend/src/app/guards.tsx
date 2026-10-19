@@ -49,6 +49,12 @@ export function CanAddEntriesRoute() {
   return user.can_add_entries ? <Outlet /> : <NotFoundPage />
 }
 
+/** Food MSME partner entries: DOST FIC Focal accounts only. The API enforces this too. */
+export function CanAddMsmeReportsRoute() {
+  const user = useCurrentUser()
+  return user.can_add_msme_reports ? <Outlet /> : <NotFoundPage />
+}
+
 /** The all-entries data table: superadmin and DOST FIC Focal accounts. The API enforces this too. */
 export function ViewAllEntriesRoute() {
   const user = useCurrentUser()
