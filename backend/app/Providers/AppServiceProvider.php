@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(fn () => Password::min(8)->letters()->numbers());
 
         Gate::define('access-admin', fn (User $user) => $user->isSuperadmin());
+        Gate::define('view-all-entries', fn (User $user) => $user->canViewAllEntries());
 
         $this->configureRateLimiting();
     }

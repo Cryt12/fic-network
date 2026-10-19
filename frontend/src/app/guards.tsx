@@ -43,6 +43,18 @@ export function GuestRoute() {
   return <Outlet />
 }
 
+/** Adding / editing entries: not for read-only (DOST FIC Focal) accounts. The API enforces this too. */
+export function CanAddEntriesRoute() {
+  const user = useCurrentUser()
+  return user.can_add_entries ? <Outlet /> : <NotFoundPage />
+}
+
+/** The all-entries data table: superadmin and DOST FIC Focal accounts. The API enforces this too. */
+export function ViewAllEntriesRoute() {
+  const user = useCurrentUser()
+  return user.can_view_all_entries ? <Outlet /> : <NotFoundPage />
+}
+
 /** Superadmin-only pages look like they don't exist to everyone else. The API enforces this too. */
 export function AdminRoute() {
   const user = useCurrentUser()

@@ -23,7 +23,15 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role,
+            'role_label' => $this->role->label(),
             'is_superadmin' => $this->isSuperadmin(),
+            'is_focal' => $this->isFocal(),
+            'can_view_all_entries' => $this->canViewAllEntries(),
+            'can_add_entries' => ! $this->isFocal(),
+            'region' => $this->region,
+            'region_name' => $this->region ? config("regions.{$this->region}") : null,
+            'position' => $this->position,
+            'dost_unit' => $this->dost_unit,
             'created_at' => $this->created_at,
         ];
     }

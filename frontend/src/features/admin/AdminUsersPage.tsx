@@ -81,7 +81,8 @@ export function AdminUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>All roles</SelectItem>
-              <SelectItem value="user">Members</SelectItem>
+              <SelectItem value="user">FIC members</SelectItem>
+              <SelectItem value="focal">DOST FIC Focal</SelectItem>
               <SelectItem value="superadmin">Superadmin</SelectItem>
             </SelectContent>
           </Select>
@@ -161,6 +162,11 @@ function UsersTable({ users }: { users: AdminUser[] }) {
                   {user.name}
                 </Link>
                 {user.is_superadmin && <ShieldCheck className="ml-1.5 inline size-3.5 text-primary" aria-label="Superadmin" />}
+                {user.is_focal && (
+                  <span className="ml-1.5 rounded bg-accent px-1.5 py-0.5 align-middle text-[11px] font-medium text-accent-foreground">
+                    DOST FIC Focal
+                  </span>
+                )}
                 <span className="block text-sm text-muted-foreground">{user.email}</span>
               </TableCell>
               <TableCell className="text-muted-foreground">{formatExact(user.created_at)}</TableCell>

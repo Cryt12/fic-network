@@ -14,8 +14,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-// "role" is deliberately not fillable: it is only ever set by SuperadminSeeder.
-#[Fillable(['name', 'email', 'password'])]
+// "role" is deliberately not fillable: only SuperadminSeeder and AuthController::registerFocal set it.
+#[Fillable(['name', 'email', 'password', 'first_name', 'middle_name', 'last_name', 'age', 'position', 'dost_unit', 'region'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -58,6 +58,17 @@ class User extends Authenticatable
     public function isSuperadmin(): bool
     {
         return $this->role === Role::Superadmin;
+    }
+
+    public function isFocal(): bool
+    {
+        return $this->role === Role::Focal;
+    }
+
+    /** Superadmin and DOST FIC Focal accounts see every member's entries (read-only for Focal). */
+    public function canViewAllEntries(): bool
+    {
+        return $this->isSuperadmin() || $this->isFocal();
     }
 
     /**

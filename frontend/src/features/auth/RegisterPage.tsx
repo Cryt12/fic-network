@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, ArrowRight, CircleAlert } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useForm, type Path } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { FieldGroup } from '@/components/ui/field'
 import { useRegister } from '@/features/auth/api'
 import { AuthPanel } from '@/features/auth/AuthLayout'
+import { FocalSignupForm } from '@/features/auth/FocalSignupForm'
 import { ACCOUNT_FIELDS, registerSchema, type RegisterValues } from '@/features/auth/schemas'
 import { EntryFields } from '@/features/entries/EntryFields'
 import { EMPTY_ENTRY, fieldsInSection, type FieldSection } from '@/features/entries/fields'
@@ -38,8 +39,76 @@ const fieldsOfStep = (step: Step): Path<RegisterValues>[] =>
 
 const ALL_FIELDS = STEPS.flatMap(fieldsOfStep)
 
+type AccountType = 'member' | 'focal'
+
+const ACCOUNT_TYPES: { value: AccountType; title: string; description: string }[] = [
+  { value: 'member', title: 'FIC member', description: 'Register your Food Innovation Center and keep its details up to date.' },
+  { value: 'focal', title: 'DOST FIC Focal', description: 'For DOST regional offices. View all FIC data and reports; no data entry.' },
+]
+
 export function RegisterPage() {
   useDocumentTitle('Create an account')
+  const [type, setType] = useState<AccountType>('member')
+
+  const picker = <AccountTypePicker value={type} onChange={setType} />
+
+  if (type === 'focal') {
+    return (
+      <AuthPanel title="Create an account" subtitle="A view-only account for your DOST regional office." footer={<LogInLink />}>
+        {picker}
+        <div key="focal" className="auth-panel-enter">
+          <FocalSignupForm />
+        </div>
+      </AuthPanel>
+    )
+  }
+
+  return <MemberSignup picker={picker} />
+}
+
+/** Which kind of account: an FIC (fills in entries) or a DOST regional office (views them). */
+function AccountTypePicker({ value, onChange }: { value: AccountType; onChange: (type: AccountType) => void }) {
+  return (
+    <fieldset className="mb-6">
+      <legend className="mb-2 text-sm font-medium">Account type</legend>
+      <div className="grid gap-2 sm:grid-cols-2" role="radiogroup">
+        {ACCOUNT_TYPES.map((type) => {
+          const selected = type.value === value
+          return (
+            <button
+              key={type.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(type.value)}
+              className={cn(
+                'rounded-lg border p-3 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50',
+                selected ? 'border-primary bg-accent' : 'bg-card hover:bg-muted',
+              )}
+            >
+              <span className={cn('block text-sm font-semibold', selected && 'text-accent-foreground')}>{type.title}</span>
+              <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{type.description}</span>
+            </button>
+          )
+        })}
+      </div>
+    </fieldset>
+  )
+}
+
+function LogInLink() {
+  return (
+    <>
+      Already registered?{' '}
+      <Link to="/login" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
+        Log in
+      </Link>
+    </>
+  )
+}
+
+/** The FIC member signup: account, location, then FIC details. */
+function MemberSignup({ picker }: { picker: ReactNode }) {
   const navigate = useNavigate()
   const register = useRegister()
   const [stepIndex, setStepIndex] = useState(0)
@@ -86,17 +155,10 @@ export function RegisterPage() {
     <AuthPanel
       title="Create an account"
       subtitle={step.subtitle}
-      footer={
-        stepIndex === 0 && (
-          <>
-            Already registered?{' '}
-            <Link to="/login" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
-              Log in
-            </Link>
-          </>
-        )
-      }
+      footer={stepIndex === 0 && <LogInLink />}
     >
+      {stepIndex === 0 && picker}
+
       <ol className="mb-6 grid grid-cols-3 gap-2" aria-label="Signup steps">
         {STEPS.map((s, i) => (
           <li key={s.title} aria-current={i === stepIndex ? 'step' : undefined} className="flex flex-col gap-1.5">

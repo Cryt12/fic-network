@@ -7,7 +7,7 @@ export function AppShell() {
     <div className="grid h-dvh grid-rows-[auto_minmax(0,1fr)] bg-background">
       <header className="flex h-20 items-center gap-2 border-b-2 px-2 sm:px-4">
         <HamburgerMenu />
-        <Wordmark className="h-14" />
+        <Wordmark />
       </header>
       <Outlet />
     </div>

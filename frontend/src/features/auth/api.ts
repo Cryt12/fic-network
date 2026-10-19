@@ -1,15 +1,24 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
-import type { LoginValues, RegisterValues } from '@/features/auth/schemas'
+import type { FocalValues, LoginValues, RegisterValues } from '@/features/auth/schemas'
 
-export type Role = 'user' | 'superadmin'
+export type Role = 'user' | 'focal' | 'superadmin'
 
 export type User = {
   id: number
   name: string
   email: string
   role: Role
+  /** "FIC member", "DOST FIC Focal", "Superadmin" */
+  role_label: string
   is_superadmin: boolean
+  /** DOST FIC Focal (regional office): views all data, read-only. */
+  is_focal: boolean
+  can_view_all_entries: boolean
+  can_add_entries: boolean
+  region_name: string | null
+  position: string | null
+  dost_unit: string | null
   created_at: string
 }
 
@@ -46,6 +55,15 @@ export function useRegister() {
   return useMutation({
     mutationFn: async (values: RegisterValues) =>
       (await api<{ data: User }>('/auth/register', { method: 'POST', body: values })).data,
+    onSuccess: (user) => queryClient.setQueryData(meQueryKey, user),
+  })
+}
+
+export function useRegisterFocal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: FocalValues) =>
+      (await api<{ data: User }>('/auth/register-focal', { method: 'POST', body: values })).data,
     onSuccess: (user) => queryClient.setQueryData(meQueryKey, user),
   })
 }

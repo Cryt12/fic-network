@@ -37,6 +37,8 @@ class FicEntryController extends Controller
 
     public function store(FicEntryRequest $request): JsonResponse
     {
+        Gate::authorize('create', FicEntry::class);
+
         $entry = $request->user()->ficEntries()->create($request->validated());
 
         return (new FicEntryResource($entry))->response()->setStatusCode(201);

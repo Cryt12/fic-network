@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->middleware('throttle:register');
+    Route::post('register-focal', [AuthController::class, 'registerFocal'])->middleware('throttle:register');
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -35,11 +36,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('summary', SummaryController::class);
 });
 
-// Superadmin only. The gate is checked on the server for every request here.
-Route::middleware(['auth:sanctum', 'can:access-admin'])->prefix('admin')->group(function () {
+// All entries with every field + Excel: superadmin and DOST FIC Focal accounts (read-only).
+Route::middleware(['auth:sanctum', 'can:view-all-entries'])->prefix('admin')->group(function () {
     Route::get('entries', [AdminEntryController::class, 'index']);
     Route::get('entries/export', [AdminEntryController::class, 'export']);
+});
 
+// Superadmin only. The gate is checked on the server for every request here.
+Route::middleware(['auth:sanctum', 'can:access-admin'])->prefix('admin')->group(function () {
     Route::get('users', [AdminUserController::class, 'index']);
     Route::get('users/{user}', [AdminUserController::class, 'show']);
     Route::get('users/{user}/login-history', [AdminUserController::class, 'loginHistory']);

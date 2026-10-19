@@ -45,6 +45,22 @@ class UserFactory extends Factory
     }
 
     /**
+     * A DOST FIC Focal account (regional office).
+     */
+    public function focal(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => Role::Focal,
+            'first_name' => 'Liza',
+            'last_name' => 'Ocampo',
+            'age' => 38,
+            'position' => 'Science Research Specialist II',
+            'dost_unit' => 'Technical Services Division',
+            'region' => 'XIII',
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

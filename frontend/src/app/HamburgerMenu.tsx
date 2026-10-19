@@ -1,4 +1,4 @@
-import { ChartColumn, FilePlus2, LayoutList, LogOut, Map as MapIcon, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
+import { Building2, ChartColumn, Database, FilePlus2, LayoutList, LogOut, Map as MapIcon, Menu, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -6,22 +6,23 @@ import { Wordmark } from '@/components/Wordmark'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { useLogout } from '@/features/auth/api'
+import { useLogout, type User } from '@/features/auth/api'
 import { useCurrentUser } from '@/features/auth/current-user'
 import { errorMessage } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
-type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean }
+type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean; show?: (user: User) => boolean }
 
+// Links follow the account's abilities; the API and route guards enforce the same rules.
 const NAV: NavItem[] = [
   { to: '/', label: 'Map', icon: MapIcon, end: true },
   { to: '/summary', label: 'Summary', icon: ChartColumn },
-  { to: '/entries', label: 'My Entries', icon: LayoutList, end: true },
-  { to: '/entries/new', label: 'Add New Entry', icon: FilePlus2 },
+  { to: '/entries', label: 'My Entries', icon: LayoutList, end: true, show: (u) => u.can_add_entries },
+  { to: '/entries/new', label: 'Add New Entry', icon: FilePlus2, show: (u) => u.can_add_entries },
+  { to: '/data', label: 'All FIC Data', icon: Database, show: (u) => u.is_focal },
   { to: '/profile', label: 'My Profile', icon: UserRound },
+  { to: '/admin', label: 'Admin Panel', icon: ShieldCheck, show: (u) => u.is_superadmin },
 ]
-
-const ADMIN_NAV: NavItem = { to: '/admin', label: 'Admin Panel', icon: ShieldCheck }
 
 export function HamburgerMenu() {
   const user = useCurrentUser()
@@ -30,7 +31,7 @@ export function HamburgerMenu() {
   const [open, setOpen] = useState(false)
 
   // Admin link is only rendered for superadmins; the API enforces the same rule server-side.
-  const items = user.is_superadmin ? [...NAV, ADMIN_NAV] : NAV
+  const items = NAV.filter((item) => !item.show || item.show(user))
 
   const onLogout = async () => {
     try {
@@ -52,7 +53,7 @@ export function HamburgerMenu() {
       <SheetContent side="left" className="w-80 gap-0 p-0">
         <SheetHeader className="h-20 justify-center border-b-2 px-4">
           <SheetTitle>
-            <Wordmark className="h-14" />
+            <Wordmark />
           </SheetTitle>
           <SheetDescription className="sr-only">Main navigation</SheetDescription>
         </SheetHeader>
@@ -65,6 +66,18 @@ export function HamburgerMenu() {
               <ShieldCheck className="size-3.5" aria-hidden />
               Superadmin
             </p>
+          )}
+          {user.is_focal && (
+            <>
+              <p className="mt-2 inline-flex items-center gap-1 rounded-md bg-accent px-1.5 py-0.5 text-xs font-medium text-accent-foreground">
+                <Building2 className="size-3.5" aria-hidden />
+                DOST FIC Focal
+              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {user.position}
+                {user.region_name && <span className="block">{user.region_name}</span>}
+              </p>
+            </>
           )}
         </div>
 

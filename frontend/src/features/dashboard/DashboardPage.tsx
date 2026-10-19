@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useCurrentUser } from '@/features/auth/current-user'
 import { useMapMarkers, type MapMarker } from '@/features/entries/api'
 import { EntryPreviewSheet } from '@/features/entries/EntryPreviewSheet'
 import { EntryMarkers } from '@/features/map/EntryMarkers'
@@ -23,6 +24,7 @@ export function DashboardPage() {
   useDocumentTitle('Map')
   const markers = useMapMarkers()
   const summary = useSummary()
+  const user = useCurrentUser()
   const [params, setParams] = useSearchParams()
   const [focus, setFocus] = useState<FlyTarget | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -124,7 +126,7 @@ export function DashboardPage() {
             </Sheet>
           </div>
 
-          {markers.data?.length === 0 && (
+          {markers.data?.length === 0 && user.can_add_entries && (
             <div className="absolute inset-x-3 bottom-7 sm:right-auto sm:max-w-sm">
               <div className="rounded-lg border bg-card/95 p-4 shadow-[0_8px_24px_-12px_oklch(0.3_0.02_257/0.35)] backdrop-blur-sm">
                 <p className="text-sm font-semibold tracking-tight">No FIC entries on the map yet</p>

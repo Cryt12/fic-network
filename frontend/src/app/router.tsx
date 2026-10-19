@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/app/AppShell'
 import { ComingSoonPage } from '@/app/ComingSoonPage'
-import { AdminRoute, GuestRoute, ProtectedRoute } from '@/app/guards'
+import { AdminRoute, CanAddEntriesRoute, GuestRoute, ProtectedRoute, ViewAllEntriesRoute } from '@/app/guards'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { AdminEntriesPage } from '@/features/admin/AdminEntriesPage'
 import { AdminLayout } from '@/features/admin/AdminLayout'
@@ -36,9 +36,20 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <DashboardPage /> },
           { path: 'summary', element: <SummaryPage /> },
-          { path: 'entries', element: <MyEntriesPage /> },
-          { path: 'entries/new', element: <NewEntryPage /> },
-          { path: 'entries/:id/edit', element: <EditEntryPage /> },
+          {
+            element: <CanAddEntriesRoute />,
+            children: [
+              { path: 'entries', element: <MyEntriesPage /> },
+              { path: 'entries/new', element: <NewEntryPage /> },
+              { path: 'entries/:id/edit', element: <EditEntryPage /> },
+            ],
+          },
+          {
+            // DOST FIC Focal accounts: every FIC's data, read-only, with the Excel report.
+            path: 'data',
+            element: <ViewAllEntriesRoute />,
+            children: [{ index: true, element: <AdminEntriesPage /> }],
+          },
           { path: 'profile', element: <ComingSoonPage title="My Profile" phase={5} /> },
           {
             path: 'admin',

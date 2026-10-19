@@ -66,8 +66,18 @@ export type AdminUser = {
   id: number
   name: string
   email: string
-  role: 'user' | 'superadmin'
+  role: 'user' | 'focal' | 'superadmin'
+  role_label: string
   is_superadmin: boolean
+  is_focal: boolean
+  /** DOST FIC Focal profile (null for other roles). */
+  first_name: string | null
+  middle_name: string | null
+  last_name: string | null
+  age: number | null
+  position: string | null
+  dost_unit: string | null
+  region_name: string | null
   created_at: string
   entries_count: number
   logins_count: number

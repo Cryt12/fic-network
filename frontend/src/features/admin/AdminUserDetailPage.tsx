@@ -79,6 +79,26 @@ function UserHeader({ user }: { user: AdminUser }) {
         Registered {formatExact(user.created_at)}
       </p>
 
+      {user.is_focal && (
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+          {[
+            ['Account type', 'DOST FIC Focal (view only)'],
+            ['Region', user.region_name],
+            ['Position', user.position],
+            ['DOST unit / division', user.dost_unit],
+            ['First name', user.first_name],
+            ['Middle name', user.middle_name || 'None'],
+            ['Last name', user.last_name],
+            ['Age', user.age],
+          ].map(([label, value]) => (
+            <div key={label as string}>
+              <dt className="text-xs text-muted-foreground">{label}</dt>
+              <dd className="font-medium">{value ?? 'Not set'}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
       <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-y py-4 sm:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label}>

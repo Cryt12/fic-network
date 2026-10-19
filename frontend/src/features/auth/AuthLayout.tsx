@@ -16,7 +16,7 @@ export function AuthLayout() {
     <div className="grid min-h-dvh bg-background lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       {/* Logo and form share one centered column; the DOST mark sits at the bottom of it. */}
       <div className="flex justify-center px-4 sm:px-10">
-        <div className="flex min-h-dvh w-full max-w-md flex-col py-8">
+        <div className="flex min-h-dvh w-full max-w-md flex-col py-6">
           <main className="flex flex-1 flex-col justify-center">
             <Link
               to="/login"
@@ -31,8 +31,8 @@ export function AuthLayout() {
           </main>
 
           {/* In the page flow below the form (never over it), pushed to the bottom when there's room. */}
-          <footer className="mt-8 border-t pt-5">
-            <img src={dostLogo} alt="Department of Science and Technology (DOST)" width={140} height={192} className="h-11 w-auto" />
+          <footer className="mt-6 border-t pt-4">
+            <img src={dostLogo} alt="Department of Science and Technology (DOST)" width={140} height={192} className="h-16 w-auto" />
           </footer>
         </div>
       </div>
