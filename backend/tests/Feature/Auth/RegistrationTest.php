@@ -23,7 +23,9 @@ class RegistrationTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return [
-            'name' => 'Maria Santos',
+            'first_name' => 'Maria',
+            'middle_name' => 'Clara',
+            'last_name' => 'Santos',
             'email' => 'maria@example.com',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
@@ -37,6 +39,7 @@ class RegistrationTest extends TestCase
         $this->postJson('/api/auth/register', $this->payload())
             ->assertCreated()
             ->assertJsonPath('data.email', 'maria@example.com')
+            ->assertJsonPath('data.name', 'Maria Clara Santos')
             ->assertJsonPath('data.role', 'user')
             ->assertJsonMissingPath('data.password');
 
@@ -58,6 +61,20 @@ class RegistrationTest extends TestCase
 
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('fic_entries', 0);
+    }
+
+    public function test_first_and_last_name_are_required_and_middle_name_is_optional(): void
+    {
+        $this->postJson('/api/auth/register', $this->payload(['first_name' => '', 'last_name' => '']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['first_name', 'last_name']);
+
+        $this->postJson('/api/auth/register', $this->payload(['middle_name' => null]))
+            ->assertCreated()
+            ->assertJsonPath('data.name', 'Maria Santos');
+
+        $user = User::sole();
+        $this->assertSame(['Maria', null, 'Santos'], [$user->first_name, $user->middle_name, $user->last_name]);
     }
 
     public function test_role_cannot_be_chosen_at_signup(): void

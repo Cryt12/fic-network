@@ -24,7 +24,8 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = DB::transaction(function () use ($request) {
-            $user = User::create($request->safe()->only(['name', 'email', 'password']));
+            $names = $request->safe()->only(['first_name', 'middle_name', 'last_name']);
+            $user = User::create([...$names, 'name' => self::fullName($names), ...$request->safe()->only(['email', 'password'])]);
             $user->ficEntries()->create($request->validated('entry'));
 
             return $user;
@@ -43,15 +44,26 @@ class AuthController extends Controller
     public function registerFocal(FocalRegisterRequest $request): JsonResponse
     {
         $profile = $request->safe()->only(['first_name', 'middle_name', 'last_name', 'age', 'position', 'dost_unit', 'region']);
-        $name = collect([$profile['first_name'], $profile['middle_name'] ?? null, $profile['last_name']])->filter()->implode(' ');
-
-        $user = new User([...$profile, 'name' => $name, ...$request->safe()->only(['email', 'password'])]);
+        $user = new User([...$profile, 'name' => self::fullName($profile), ...$request->safe()->only(['email', 'password'])]);
         $user->forceFill(['role' => Role::Focal])->save();
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
         return (new UserResource($user))->response()->setStatusCode(201);
+    }
+
+    /**
+     * "First Middle Last" (middle name optional): the display name used across the app.
+     *
+     * @param  array<string, mixed>  $names
+     */
+    private static function fullName(array $names): string
+    {
+        return collect([$names['first_name'] ?? null, $names['middle_name'] ?? null, $names['last_name'] ?? null])
+            ->map(fn ($part) => trim((string) $part))
+            ->filter()
+            ->implode(' ');
     }
 
     public function login(LoginRequest $request): UserResource

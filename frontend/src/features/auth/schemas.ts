@@ -11,7 +11,9 @@ export const loginSchema = z.object({
 })
 
 const accountShape = {
-  name: z.string().trim().min(1, 'Enter your name.').max(255),
+  first_name: z.string().trim().min(1, 'Enter your first name.').max(100),
+  middle_name: z.string().trim().max(100),
+  last_name: z.string().trim().min(1, 'Enter your last name.').max(100),
   email,
   password: z
     .string()

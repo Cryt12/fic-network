@@ -118,7 +118,7 @@ function MemberSignup({ picker }: { picker: ReactNode }) {
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: '', email: '', password: '', password_confirmation: '', entry: EMPTY_ENTRY },
+    defaultValues: { first_name: '', middle_name: '', last_name: '', email: '', password: '', password_confirmation: '', entry: EMPTY_ENTRY },
   })
   const { errors } = form.formState
   useRevalidateErrors(form)
@@ -188,14 +188,17 @@ function MemberSignup({ picker }: { picker: ReactNode }) {
         <div key={stepIndex} className="auth-panel-enter">
           {step.sections.length === 0 ? (
             <FieldGroup className="gap-5">
-              <TextField
-                id="name"
-                label="Name"
-                autoComplete="name"
-                description="Shown to other members as the first few letters only."
-                error={errors.name}
-                {...form.register('name')}
-              />
+              <div className="grid gap-5 sm:grid-cols-2">
+                <TextField id="first_name" label="First name" autoComplete="given-name" error={errors.first_name} {...form.register('first_name')} />
+                <TextField
+                  id="middle_name"
+                  label="Middle name (optional)"
+                  autoComplete="additional-name"
+                  error={errors.middle_name}
+                  {...form.register('middle_name')}
+                />
+              </div>
+              <TextField id="last_name" label="Last name" autoComplete="family-name" error={errors.last_name} {...form.register('last_name')} />
               <TextField id="email" label="Email" type="email" autoComplete="email" error={errors.email} {...form.register('email')} />
               <TextField
                 id="password"

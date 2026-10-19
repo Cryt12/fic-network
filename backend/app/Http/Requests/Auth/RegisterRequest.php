@@ -21,7 +21,9 @@ class RegisterRequest extends FormRequest
         $superadminEmail = Str::lower((string) config('fic.superadmin.email'));
 
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:100'],
+            'middle_name' => ['nullable', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
             'email' => [
                 'required', 'string', 'email', 'max:255',
                 Rule::unique('users', 'email'),
