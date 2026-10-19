@@ -1,16 +1,27 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, FileSpreadsheet, History, LoaderCircle, MapPinOff, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, FileSpreadsheet, History, KeyRound, LoaderCircle, MapPinOff, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NotFoundPage } from '@/app/NotFoundPage'
-import { downloadReport, useAdminEntries, useAdminUser, useLoginHistory, type AdminUser, type EntryFilters } from '@/features/admin/api'
+import { downloadReport, useAdminEntries, useAdminUser, useLoginHistory, useResetPassword, type AdminUser, type EntryFilters } from '@/features/admin/api'
 import { LoginResultBadge } from '@/features/admin/LoginResultBadge'
 import { LtoBadge } from '@/features/entries/LtoBadge'
 import { ApiError, errorMessage } from '@/lib/api'
@@ -62,14 +73,19 @@ function UserHeader({ user }: { user: AdminUser }) {
 
   return (
     <header>
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{user.name}</h1>
-        {user.is_superadmin && (
-          <Badge variant="secondary" className="bg-accent text-accent-foreground">
-            <ShieldCheck />
-            Superadmin
-          </Badge>
-        )}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">{user.name}</h1>
+          {user.is_superadmin && (
+            <Badge variant="secondary" className="bg-accent text-accent-foreground">
+              <ShieldCheck />
+              Superadmin
+            </Badge>
+          )}
+          {user.must_change_password && <PasswordResetBadge />}
+        </div>
+        {/* The superadmin's own password lives in the server's .env; the API refuses it too. */}
+        {!user.is_superadmin && <ResetPasswordButton user={user} />}
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         {user.email}
@@ -110,6 +126,62 @@ function UserHeader({ user }: { user: AdminUser }) {
         ))}
       </dl>
     </header>
+  )
+}
+
+function PasswordResetBadge() {
+  return (
+    <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+      <KeyRound />
+      Password reset, not yet changed
+    </Badge>
+  )
+}
+
+function ResetPasswordButton({ user }: { user: AdminUser }) {
+  const reset = useResetPassword(user.id)
+  const [open, setOpen] = useState(false)
+
+  const confirm = async () => {
+    try {
+      await reset.mutateAsync()
+      toast.success(`${user.name}'s password was reset to dost1234. They'll be asked to set a new one when they log in.`)
+      setOpen(false)
+    } catch (error) {
+      toast.error(`Couldn't reset the password. ${errorMessage(error)}`)
+    }
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={(next) => !reset.isPending && setOpen(next)}>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline">
+          <KeyRound data-icon="inline-start" />
+          Reset password
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Reset {user.name}'s password?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Their password becomes <strong className="font-semibold text-foreground">dost1234</strong> and they're signed out everywhere. When
+            they log in with it, they must choose a new password before they can do anything else.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={reset.isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={reset.isPending}
+            onClick={(event) => {
+              event.preventDefault() // keep the dialog open until the request finishes
+              void confirm()
+            }}
+          >
+            {reset.isPending ? 'Resetting...' : 'Reset password'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

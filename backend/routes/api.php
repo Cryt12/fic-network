@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('change-password', [AuthController::class, 'changePassword'])->middleware('throttle:10,1');
     });
 });
 
@@ -28,7 +29,8 @@ Route::get('places', [PlaceController::class, 'index'])->middleware('throttle:12
 // Each lookup may call OpenStreetMap, so this one is throttled harder.
 Route::get('places/{place}/location', [PlaceController::class, 'location'])->middleware('throttle:30,1');
 
-Route::middleware('auth:sanctum')->group(function () {
+// password.changed: an account reset by the superadmin can't use anything else until it sets a new password.
+Route::middleware(['auth:sanctum', 'password.changed'])->group(function () {
     Route::get('recent-logins', RecentLoginController::class);
 
     Route::get('my/entries', [FicEntryController::class, 'mine']);
@@ -42,14 +44,15 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // All entries with every field + Excel: superadmin and DOST FIC Focal accounts (read-only).
-Route::middleware(['auth:sanctum', 'can:view-all-entries'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'password.changed', 'can:view-all-entries'])->prefix('admin')->group(function () {
     Route::get('entries', [AdminEntryController::class, 'index']);
     Route::get('entries/export', [AdminEntryController::class, 'export']);
 });
 
 // Superadmin only. The gate is checked on the server for every request here.
-Route::middleware(['auth:sanctum', 'can:access-admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'password.changed', 'can:access-admin'])->prefix('admin')->group(function () {
     Route::get('users', [AdminUserController::class, 'index']);
     Route::get('users/{user}', [AdminUserController::class, 'show']);
     Route::get('users/{user}/login-history', [AdminUserController::class, 'loginHistory']);
+    Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword']);
 });

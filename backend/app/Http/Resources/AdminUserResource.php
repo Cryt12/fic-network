@@ -28,6 +28,7 @@ class AdminUserResource extends JsonResource
             'role_label' => $this->role->label(),
             'is_superadmin' => $this->isSuperadmin(),
             'is_focal' => $this->isFocal(),
+            'must_change_password' => (bool) $this->must_change_password,
             'first_name' => $this->first_name,
             'middle_name' => $this->middle_name,
             'last_name' => $this->last_name,

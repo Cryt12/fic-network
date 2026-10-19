@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
 import type { FicEntry, Paginated } from '@/features/entries/api'
 
@@ -73,6 +73,8 @@ export type AdminUser = {
   role_label: string
   is_superadmin: boolean
   is_focal: boolean
+  /** Reset to the temporary password and hasn't set a new one yet. */
+  must_change_password: boolean
   /** DOST FIC Focal profile (null for other roles). */
   first_name: string | null
   middle_name: string | null
@@ -130,5 +132,14 @@ export function useLoginHistory(id: number, page: number) {
     queryKey: ['admin', 'users', id, 'logins', page],
     queryFn: () => api<SimplePage<LoginEvent>>(`/admin/users/${id}/login-history?page=${page}`),
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Sets the account's password to the temporary one; the owner must choose a new one at next sign-in. */
+export function useResetPassword(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => (await api<{ data: AdminUser }>(`/admin/users/${id}/reset-password`, { method: 'POST' })).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
   })
 }

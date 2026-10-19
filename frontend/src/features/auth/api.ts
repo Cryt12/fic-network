@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
-import type { FocalValues, LoginValues, RegisterValues } from '@/features/auth/schemas'
+import type { FocalValues, LoginValues, NewPasswordValues, RegisterValues } from '@/features/auth/schemas'
 
 export type Role = 'user' | 'focal' | 'superadmin'
 
@@ -14,6 +14,8 @@ export type User = {
   is_superadmin: boolean
   /** DOST FIC Focal (regional office): views all data, read-only. */
   is_focal: boolean
+  /** The superadmin reset this account's password: it must set a new one before anything else. */
+  must_change_password: boolean
   can_view_all_entries: boolean
   can_add_entries: boolean
   /** DOST FIC Focal accounts report Food MSME partners for their region. */
@@ -66,6 +68,15 @@ export function useRegisterFocal() {
   return useMutation({
     mutationFn: async (values: FocalValues) =>
       (await api<{ data: User }>('/auth/register-focal', { method: 'POST', body: values })).data,
+    onSuccess: (user) => queryClient.setQueryData(meQueryKey, user),
+  })
+}
+
+export function useChangePassword() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (values: NewPasswordValues) =>
+      (await api<{ data: User }>('/auth/change-password', { method: 'POST', body: values })).data,
     onSuccess: (user) => queryClient.setQueryData(meQueryKey, user),
   })
 }

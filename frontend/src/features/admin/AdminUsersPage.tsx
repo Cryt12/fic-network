@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Search, ShieldCheck, UsersRound } from 'lucide-react'
+import { ChevronLeft, ChevronRight, KeyRound, Search, ShieldCheck, UsersRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
@@ -165,6 +165,12 @@ function UsersTable({ users }: { users: AdminUser[] }) {
                 {user.is_focal && (
                   <span className="ml-1.5 rounded bg-accent px-1.5 py-0.5 align-middle text-[11px] font-medium text-accent-foreground">
                     DOST FIC Focal
+                  </span>
+                )}
+                {user.must_change_password && (
+                  <span className="ml-1.5 inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 align-middle text-[11px] font-medium text-amber-800">
+                    <KeyRound className="size-3" aria-hidden />
+                    Password reset
                   </span>
                 )}
                 <span className="block text-sm text-muted-foreground">{user.email}</span>

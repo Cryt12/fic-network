@@ -8,6 +8,7 @@ import { AdminLayout } from '@/features/admin/AdminLayout'
 import { AdminUserDetailPage } from '@/features/admin/AdminUserDetailPage'
 import { AdminUsersPage } from '@/features/admin/AdminUsersPage'
 import { AuthLayout } from '@/features/auth/AuthLayout'
+import { ChangePasswordPage } from '@/features/auth/ChangePasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
@@ -33,6 +34,11 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
+      {
+        // After the superadmin resets a password: same frame as login, nothing else reachable.
+        element: <AuthLayout />,
+        children: [{ path: '/change-password', element: <ChangePasswordPage /> }],
+      },
       {
         element: <AppShell />,
         children: [

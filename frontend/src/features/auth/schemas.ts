@@ -51,6 +51,13 @@ export const focalSchema = z
 
 export type FocalValues = z.infer<typeof focalSchema>
 
+/** The new password after the superadmin reset the account. Mirrors ChangePasswordRequest. */
+export const newPasswordSchema = z
+  .object({ password: accountShape.password, password_confirmation: z.string() })
+  .refine(passwordsMatch, passwordsMatchError)
+
+export type NewPasswordValues = z.infer<typeof newPasswordSchema>
+
 export const ACCOUNT_FIELDS = Object.keys(accountShape) as (keyof typeof accountShape)[]
 
 export type LoginValues = z.infer<typeof loginSchema>

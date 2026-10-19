@@ -17,7 +17,13 @@ function FullPageLoading() {
   )
 }
 
-/** Logged-in users only. Everyone else goes to /login and comes back afterwards. */
+const CHANGE_PASSWORD = '/change-password'
+
+/**
+ * Logged-in users only. Everyone else goes to /login and comes back afterwards.
+ * An account the superadmin reset is held on /change-password until it sets a new password
+ * (the API refuses its other requests too).
+ */
 export function ProtectedRoute() {
   const { data: user, isPending, isError, error, refetch } = useMe()
   const location = useLocation()
@@ -25,6 +31,8 @@ export function ProtectedRoute() {
   if (isPending) return <FullPageLoading />
   if (isError) return <ErrorState className="h-dvh" error={error} onRetry={() => refetch()} />
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
+  if (user.must_change_password && location.pathname !== CHANGE_PASSWORD) return <Navigate to={CHANGE_PASSWORD} replace />
+  if (!user.must_change_password && location.pathname === CHANGE_PASSWORD) return <Navigate to="/" replace />
 
   return (
     <CurrentUserContext value={user}>

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
@@ -51,6 +52,26 @@ class UserController extends Controller
     public function show(User $user): AdminUserResource
     {
         return new AdminUserResource($this->withActivity(User::query())->findOrFail($user->id));
+    }
+
+    /**
+     * Sets the account's password to the temporary one (config fic.reset_password) and makes
+     * the owner choose a new one at their next sign-in. Signs the account out everywhere.
+     * The superadmin's own password is managed in the server's .env, not here.
+     */
+    public function resetPassword(User $user): AdminUserResource
+    {
+        abort_if($user->isSuperadmin(), 403, "The superadmin's password can't be reset here.");
+
+        $user->forceFill([
+            'password' => config('fic.reset_password'),
+            'must_change_password' => true,
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        DB::table(config('session.table'))->where('user_id', $user->id)->delete();
+
+        return $this->show($user);
     }
 
     /**

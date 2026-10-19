@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'is_superadmin' => $this->isSuperadmin(),
             'is_focal' => $this->isFocal(),
             'can_view_all_entries' => $this->canViewAllEntries(),
+            'must_change_password' => (bool) $this->must_change_password,
             'can_add_entries' => ! $this->isFocal(),
             'can_add_msme_reports' => $this->can('create', MsmeReport::class),
             'region' => $this->region,

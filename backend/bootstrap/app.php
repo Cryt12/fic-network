@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordIsChanged;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // The Vite dev proxy (and a same-host reverse proxy in production) forwards the
         // client's real IP, which is what login_activities records.
         $middleware->trustProxies(at: ['127.0.0.1', '::1']);
+
+        $middleware->alias(['password.changed' => EnsurePasswordIsChanged::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

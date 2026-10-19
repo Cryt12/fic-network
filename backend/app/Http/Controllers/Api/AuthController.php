@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\FocalRegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -82,6 +83,24 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return response()->noContent();
+    }
+
+    /**
+     * A new password: required after the superadmin resets an account, optional otherwise.
+     * Every other session of the account is signed out; this one stays signed in.
+     */
+    public function changePassword(ChangePasswordRequest $request): UserResource
+    {
+        $user = $request->user();
+        $user->forceFill(['password' => $request->validated('password'), 'must_change_password' => false])->save();
+
+        $request->session()->regenerate();
+        DB::table(config('session.table'))
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $request->session()->getId())
+            ->delete();
+
+        return new UserResource($user);
     }
 
     public function me(Request $request): UserResource

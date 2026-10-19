@@ -25,6 +25,18 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Temporary Password
+    |--------------------------------------------------------------------------
+    |
+    | What the superadmin's "Reset password" sets. The account must choose a
+    | new password (which can't be this one) the next time it signs in.
+    |
+    */
+
+    'reset_password' => env('FIC_RESET_PASSWORD', 'dost1234'),
+
     'superadmin' => [
         'name' => env('SUPERADMIN_NAME', 'FIC Superadmin'),
         'email' => env('SUPERADMIN_EMAIL'),
