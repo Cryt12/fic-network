@@ -23,7 +23,10 @@ class EntryController extends Controller
 
         $entries = $query->with('user:id,name,email')->paginate(self::PER_PAGE)->withQueryString();
 
-        return AdminEntryResource::collection($entries)->additional(['totals' => $totals]);
+        return AdminEntryResource::collection($entries)->additional([
+            'totals' => $totals,
+            'assistance' => EntryReport::assistanceCounts($request->filteredQuery()),
+        ]);
     }
 
     /**

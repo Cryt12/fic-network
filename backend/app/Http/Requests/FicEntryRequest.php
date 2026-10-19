@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\AssistanceType;
+use App\Enums\EquipmentOperation;
+use App\Enums\EquipmentUtilization;
 use App\Enums\LtoStatus;
 use App\Models\FicEntry;
 use App\Rules\PlaceRule;
@@ -68,6 +70,11 @@ class FicEntryRequest extends FormRequest
             $prefix.'msmes_served' => $count,
             $prefix.'assistance_types' => ['present', 'array'],
             $prefix.'assistance_types.*' => ['distinct', Rule::enum(AssistanceType::class)],
+            $prefix.'equipment' => ['present', 'array', 'max:50'],
+            $prefix.'equipment.*.name' => ['required', 'string', 'max:100', 'distinct:ignore_case'],
+            $prefix.'equipment.*.operation_status' => ['required', Rule::enum(EquipmentOperation::class)],
+            $prefix.'equipment.*.utilization_status' => ['required', Rule::enum(EquipmentUtilization::class)],
+            $prefix.'equipment.*.capacity' => ['required', 'string', 'max:100'],
             $prefix.'assistance_other' => [
                 'nullable', 'string', 'max:255',
                 Rule::requiredIf(fn () => in_array(
@@ -87,6 +94,11 @@ class FicEntryRequest extends FormRequest
         return [
             $prefix.'products_commercialized.lte' => 'Products commercialized cannot be more than products developed.',
             $prefix.'assistance_other.required' => 'Describe the other type of assistance.',
+            $prefix.'equipment.*.name.required' => 'Name the equipment.',
+            $prefix.'equipment.*.name.distinct' => 'This equipment is listed twice.',
+            $prefix.'equipment.*.operation_status.required' => 'Select the operation status.',
+            $prefix.'equipment.*.utilization_status.required' => 'Select the utilization status.',
+            $prefix.'equipment.*.capacity.required' => 'Enter the capacity per batch.',
         ];
     }
 }

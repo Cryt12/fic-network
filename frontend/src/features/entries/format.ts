@@ -1,5 +1,5 @@
 import type { FicEntry } from '@/features/entries/api'
-import { ENTRY_FIELDS, optionLabel, type EntryFieldKey } from '@/features/entries/fields'
+import { ENTRY_FIELDS, optionLabel, type EntryFieldKey, type EntryValues } from '@/features/entries/fields'
 
 const numberFormat = new Intl.NumberFormat('en-PH')
 
@@ -11,6 +11,13 @@ export function formatField(entry: Pick<FicEntry, 'region_name'> & Partial<FicEn
   switch (input.kind) {
     case 'region':
       return entry.region_name
+    case 'equipment': {
+      const items = (value as EntryValues['equipment'] | undefined) ?? []
+      if (items.length === 0) return 'None listed'
+      return items
+        .map((item) => `${item.name}: ${optionLabel(input.operation, item.operation_status)}, ${optionLabel(input.utilization, item.utilization_status)}, ${item.capacity} per batch`)
+        .join('\n')
+    }
     case 'place':
       return entry[input.level] ?? 'Not set'
     case 'geotag':

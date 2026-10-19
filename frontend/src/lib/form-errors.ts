@@ -13,10 +13,14 @@ export function applyServerErrors<T extends FieldValues>(
   if (error instanceof ApiError && error.status === 422) {
     let unmatched: string | null = null
     for (const [rawField, messages] of Object.entries(error.errors)) {
-      // "assistance_types.0" (an array item) belongs to the "assistance_types" input.
+      // "assistance_types.0" (an array item) belongs to the "assistance_types" input...
       const field = rawField.replace(/\.\d+$/, '')
+      // ...while "equipment.0.capacity" is its own input inside a list field.
+      const insideListField = (fields as readonly string[]).some((f) => rawField.startsWith(`${f}.`))
       if ((fields as readonly string[]).includes(field)) {
         setError(field as Path<T>, { type: 'server', message: messages[0] })
+      } else if (insideListField) {
+        setError(rawField as Path<T>, { type: 'server', message: messages[0] })
       } else {
         unmatched ??= messages[0] ?? error.message
       }

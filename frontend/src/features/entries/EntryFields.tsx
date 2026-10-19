@@ -1,6 +1,6 @@
-import { Info, LoaderCircle, RotateCw } from 'lucide-react'
+import { Info, LoaderCircle, Plus, RotateCw, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Controller, get, useWatch, type FieldValues, type Path, type UseFormReturn } from 'react-hook-form'
+import { Controller, get, useFieldArray, useWatch, type ArrayPath, type FieldValues, type Path, type UseFormReturn } from 'react-hook-form'
 import { TextField } from '@/components/TextField'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { usePlaceLocation, usePlaces, useRegions } from '@/features/entries/api'
-import { ENTRY_FIELDS, SECTIONS, dependentPlaceFields, fieldsInSection, type EntryFieldKey, type FieldSection } from '@/features/entries/fields'
+import { ENTRY_FIELDS, SECTIONS, dependentPlaceFields, fieldsInSection, type EntryFieldKey, type FieldInput, type FieldSection } from '@/features/entries/fields'
 import { GeotagPicker, type MapFocus } from '@/features/map/GeotagPicker'
 import { REGION_BOUNDS } from '@/features/map/region-bounds'
 
@@ -91,6 +91,9 @@ function EntryInput<T extends FieldValues>({ form, fieldKey, prefix }: EntryInpu
 
     case 'region':
       return <RegionSelect form={form} name={name} id={id} label={config.label} error={error} prefix={prefix} />
+
+    case 'equipment':
+      return <EquipmentField form={form} prefix={prefix} fieldKey={fieldKey} id={id} label={config.label} input={config.input} />
 
     case 'place':
       return (
@@ -182,6 +185,137 @@ function EntryInput<T extends FieldValues>({ form, fieldKey, prefix }: EntryInpu
       )
     }
   }
+}
+
+type EquipmentInput = Extract<FieldInput, { kind: 'equipment' }>
+
+type EquipmentFieldProps<T extends FieldValues> = {
+  form: UseFormReturn<T>
+  prefix: string
+  fieldKey: EntryFieldKey
+  id: string
+  label: string
+  input: EquipmentInput
+}
+
+const BLANK_EQUIPMENT = { operation_status: '', utilization_status: '', capacity: '' }
+
+/**
+ * The FIC's equipment: tick the common ones or add others; each gets an operation status,
+ * a utilization status and a capacity per batch.
+ */
+function EquipmentField<T extends FieldValues>({ form, prefix, fieldKey, id, input }: EquipmentFieldProps<T>) {
+  const name = `${prefix}${fieldKey}` as ArrayPath<T>
+  const { fields, append, remove } = useFieldArray({ control: form.control, name })
+  const items = (useWatch({ control: form.control, name: name as unknown as Path<T> }) ?? []) as { name: string }[]
+  const indexOf = (equipment: string) => items.findIndex((item) => item.name.trim().toLowerCase() === equipment.toLowerCase())
+  const path = (i: number, key: string) => `${name}.${i}.${key}` as Path<T>
+  const errorAt = (i: number, key: string) => get(form.formState.errors, path(i, key))
+
+  const addOther = () => {
+    append({ name: '', ...BLANK_EQUIPMENT } as never)
+    requestAnimationFrame(() => document.getElementById(`${id}-${fields.length}-name`)?.focus())
+  }
+
+  return (
+    <FieldSet>
+      <FieldLegend variant="label">Equipment the FIC has</FieldLegend>
+      <div className="grid gap-x-6 gap-y-2.5 sm:grid-cols-3">
+        {input.presets.map((equipment) => {
+          const index = indexOf(equipment)
+          return (
+            <Field key={equipment} orientation="horizontal">
+              <Checkbox
+                id={`${id}-preset-${equipment}`}
+                checked={index !== -1}
+                onCheckedChange={(checked) => (checked ? append({ name: equipment, ...BLANK_EQUIPMENT } as never) : remove(index))}
+              />
+              <FieldLabel htmlFor={`${id}-preset-${equipment}`} className="font-normal">
+                {equipment}
+              </FieldLabel>
+            </Field>
+          )
+        })}
+      </div>
+
+      {fields.length > 0 && (
+        <ul className="mt-2 flex flex-col gap-3">
+          {fields.map((field, i) => {
+            const isPreset = input.presets.some((p) => p.toLowerCase() === (items[i]?.name ?? '').trim().toLowerCase())
+            return (
+              <li key={field.id} className="rounded-lg border bg-card p-4">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  {isPreset ? (
+                    <p className="text-sm font-semibold">{items[i]?.name}</p>
+                  ) : (
+                    <Field data-invalid={errorAt(i, 'name') ? true : undefined} className="max-w-sm">
+                      <FieldLabel htmlFor={`${id}-${i}-name`}>Equipment name</FieldLabel>
+                      <Input id={`${id}-${i}-name`} aria-invalid={errorAt(i, 'name') ? true : undefined} {...form.register(path(i, 'name'))} />
+                      <FieldError errors={errorAt(i, 'name') ? [errorAt(i, 'name')] : undefined} />
+                    </Field>
+                  )}
+                  <Button type="button" variant="ghost" size="icon-sm" onClick={() => remove(i)} aria-label={`Remove ${items[i]?.name || 'this equipment'}`}>
+                    <X />
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <OptionSelect form={form} name={path(i, 'operation_status')} id={`${id}-${i}-operation`} label="Operation status" options={input.operation} error={errorAt(i, 'operation_status')} />
+                  <OptionSelect form={form} name={path(i, 'utilization_status')} id={`${id}-${i}-utilization`} label="Utilization status" options={input.utilization} error={errorAt(i, 'utilization_status')} />
+                  <Field data-invalid={errorAt(i, 'capacity') ? true : undefined}>
+                    <FieldLabel htmlFor={`${id}-${i}-capacity`}>Capacity (per batch)</FieldLabel>
+                    <Input id={`${id}-${i}-capacity`} placeholder="e.g. 50 kg" aria-invalid={errorAt(i, 'capacity') ? true : undefined} {...form.register(path(i, 'capacity'))} />
+                    <FieldError errors={errorAt(i, 'capacity') ? [errorAt(i, 'capacity')] : undefined} />
+                  </Field>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      <Button type="button" variant="outline" size="sm" className="mt-1 w-fit" onClick={addOther}>
+        <Plus data-icon="inline-start" />
+        Add other equipment
+      </Button>
+    </FieldSet>
+  )
+}
+
+type OptionSelectProps<T extends FieldValues> = {
+  form: UseFormReturn<T>
+  name: Path<T>
+  id: string
+  label: string
+  options: readonly { value: string; label: string }[]
+  error?: { message?: string }
+}
+
+function OptionSelect<T extends FieldValues>({ form, name, id, label, options, error }: OptionSelectProps<T>) {
+  return (
+    <Controller
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <Field data-invalid={error ? true : undefined}>
+          <FieldLabel htmlFor={id}>{label}</FieldLabel>
+          <Select value={field.value || ''} onValueChange={field.onChange}>
+            <SelectTrigger id={id} aria-invalid={error ? true : undefined} className="w-full" onBlur={field.onBlur}>
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError errors={error ? [error] : undefined} />
+        </Field>
+      )}
+    />
+  )
 }
 
 /** Picking a region/province/... clears the choices below it, which no longer fit. */

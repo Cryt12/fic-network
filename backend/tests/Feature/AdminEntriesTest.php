@@ -83,6 +83,28 @@ class AdminEntriesTest extends TestCase
         $this->assertSame([], $ids('to=2026-10-04'));
     }
 
+    public function test_counts_each_type_of_assistance_requested_within_the_filters(): void
+    {
+        FicEntry::factory()->create(['region' => 'XIII', 'assistance_types' => ['training', 'packaging_labeling']]);
+        FicEntry::factory()->create(['region' => 'XIII', 'assistance_types' => ['training']]);
+        FicEntry::factory()->create(['region' => 'VII', 'assistance_types' => ['training', 'scale_up']]);
+        FicEntry::factory()->create(['region' => 'XIII', 'assistance_types' => ['scale_up']])->delete(); // deleted: not counted
+
+        $counts = fn (string $query) => collect($this->actingAs($this->admin)->getJson("/api/admin/entries?{$query}")->assertOk()->json('assistance'))
+            ->pluck('fics', 'type');
+
+        $all = $counts('');
+        $this->assertCount(12, $all); // every type, even unpicked ones
+        $this->assertSame(3, $all['training']);
+        $this->assertSame(1, $all['packaging_labeling']);
+        $this->assertSame(1, $all['scale_up']);
+        $this->assertSame(0, $all['shelf_life']);
+
+        $caraga = $counts('region=XIII');
+        $this->assertSame(2, $caraga['training']);
+        $this->assertSame(0, $caraga['scale_up']);
+    }
+
     public function test_invalid_filters_are_rejected(): void
     {
         $this->actingAs($this->admin)
@@ -101,6 +123,7 @@ class AdminEntriesTest extends TestCase
             'lto_status' => 'in_process',
             'assistance_types' => ['packaging_labeling', 'other'],
             'assistance_other' => 'Halal certification',
+            'equipment' => [['name' => 'Vacuum fryer', 'operation_status' => 'non_operational', 'utilization_status' => 'not_currently_used', 'capacity' => '10 kg']],
         ]);
         FicEntry::factory()->create(['region' => 'X', 'name' => 'Not In This Report']);
 
@@ -114,6 +137,8 @@ class AdminEntriesTest extends TestCase
         $summary = $this->flatten($sheets['Summary']);
         $this->assertContains('Region XIII (Caraga)', $summary);
         $this->assertContains('LTO application in process', $summary);
+        $this->assertContains('Assistance requested by MSMEs', $summary);
+        $this->assertContains('Packaging / Labeling', $summary);
         $this->assertContains($this->admin->name, $summary);
 
         $headings = $sheets['Entries'][0];
@@ -132,6 +157,7 @@ class AdminEntriesTest extends TestCase
         $this->assertSame('LTO application in process', $row['License to Operate (LTO) status']);
         $this->assertSame('Packaging / Labeling, Other', $row['Types of assistance requested by MSMEs']);
         $this->assertSame('Halal certification', $row['Other assistance (specified)']);
+        $this->assertSame('Vacuum fryer: Non-operational, Not currently used, 10 kg per batch', $row['FIC equipment (operation status, utilization, capacity per batch)']);
     }
 
     /**

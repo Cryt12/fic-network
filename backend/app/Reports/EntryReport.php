@@ -2,6 +2,9 @@
 
 namespace App\Reports;
 
+use App\Enums\AssistanceType;
+use App\Enums\EquipmentOperation;
+use App\Enums\EquipmentUtilization;
 use App\Enums\LtoStatus;
 use App\Http\Requests\Admin\EntryFilterRequest;
 use App\Http\Resources\FicEntryResource;
@@ -10,6 +13,7 @@ use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Common\Entity\Style\Style;
@@ -41,6 +45,7 @@ class EntryReport
         'msmes_served' => 'Number of MSMEs served',
         'assistance_types' => 'Types of assistance requested by MSMEs',
         'assistance_other' => 'Other assistance (specified)',
+        'equipment' => 'FIC equipment (operation status, utilization, capacity per batch)',
     ];
 
     /** Resource keys that are not columns (region_name is shown instead of the code). */
@@ -80,6 +85,32 @@ class EntryReport
         $row = (clone $query)->reorder()->toBase()->selectRaw(implode(', ', $select))->first();
 
         return array_map('intval', (array) $row);
+    }
+
+    /**
+     * How many entries list each type of assistance requested by MSMEs, for a filtered query.
+     * Every type is included (0 when nobody picked it), in the form's order.
+     *
+     * @param  Builder<FicEntry>  $query
+     * @return list<array{type: string, label: string, fics: int}>
+     */
+    public static function assistanceCounts(Builder $query): array
+    {
+        $entries = (clone $query)->reorder()->toBase()->select('assistance_types');
+
+        // One row per (entry, type), via Postgres' JSON array expansion.
+        $counts = DB::query()
+            ->fromSub($entries, 'e')
+            ->crossJoin(DB::raw('jsonb_array_elements_text(e.assistance_types) as t(type)'))
+            ->selectRaw('t.type, count(*) as fics')
+            ->groupBy('t.type')
+            ->pluck('fics', 'type');
+
+        return array_map(fn (AssistanceType $type) => [
+            'type' => $type->value,
+            'label' => $type->label(),
+            'fics' => (int) ($counts[$type->value] ?? 0),
+        ], AssistanceType::cases());
     }
 
     public function download(): StreamedResponse
@@ -151,6 +182,15 @@ class EntryReport
         foreach ($this->grouped($query, 'lto_status') as $status => $row) {
             $writer->addRow(Row::fromValues([LtoStatus::from($status)->label(), $row['entries']]));
         }
+        $writer->addRow(Row::fromValues([]));
+
+        // Most-requested first.
+        $writer->addRow(Row::fromValuesWithStyle(['Assistance requested by MSMEs', 'FICs'], $header));
+        $assistance = self::assistanceCounts($query);
+        usort($assistance, fn ($a, $b) => $b['fics'] <=> $a['fics']);
+        foreach ($assistance as $row) {
+            $writer->addRow(Row::fromValues([$row['label'], $row['fics']]));
+        }
     }
 
     private function writeEntries(Writer $writer): void
@@ -184,7 +224,7 @@ class EntryReport
                 $writer->addRow(Row::fromValuesWithStyle([
                     $entry->user->name,
                     $entry->user->email,
-                    ...array_map(fn (string $key) => $this->cellValue($data[$key]), $columns),
+                    ...array_map(fn (string $key) => $key === 'equipment' ? self::equipmentText($data[$key]) : $this->cellValue($data[$key]), $columns),
                     $this->cellValue($entry->created_at),
                     $this->cellValue($entry->updated_at),
                 ], $wrap));
@@ -211,6 +251,26 @@ class EntryReport
             ->get()
             ->mapWithKeys(fn ($row) => [$row->{$column} => array_map('intval', array_diff_key((array) $row, [$column => true]))])
             ->all();
+    }
+
+    /**
+     * One line per item: "Spray dryer: Operational, Regularly used, 50 kg per batch".
+     *
+     * @param  array<int, array<string, string>>|null  $equipment
+     */
+    private static function equipmentText(?array $equipment): ?string
+    {
+        if (! $equipment) {
+            return null;
+        }
+
+        return collect($equipment)->map(fn (array $item) => sprintf(
+            '%s: %s, %s, %s per batch',
+            $item['name'],
+            EquipmentOperation::tryFrom($item['operation_status'] ?? '')?->label() ?? '-',
+            EquipmentUtilization::tryFrom($item['utilization_status'] ?? '')?->label() ?? '-',
+            $item['capacity'] ?? '-',
+        ))->implode("\n");
     }
 
     private function cellValue(mixed $value): string|int|float|null

@@ -31,6 +31,23 @@ export const ASSISTANCE_TYPES = [
   { value: 'other', label: 'Other' },
 ] as const
 
+/** Equipment listed with a checkbox; anything else is added with "Add other equipment". */
+export const EQUIPMENT_PRESETS = ['Spray dryer', 'Freeze dryer', 'Vacuum fryer', 'Water retort', 'Dehydrators', 'Oven'] as const
+
+export const EQUIPMENT_OPERATION = [
+  { value: 'operational', label: 'Operational' },
+  { value: 'under_maintenance', label: 'Under maintenance' },
+  { value: 'non_operational', label: 'Non-operational' },
+  { value: 'for_decommissioning', label: 'For decommissioning (irreparable)' },
+] as const
+
+export const EQUIPMENT_UTILIZATION = [
+  { value: 'regularly_used', label: 'Regularly used' },
+  { value: 'occasionally_used', label: 'Occasionally used' },
+  { value: 'rarely_used', label: 'Rarely used' },
+  { value: 'not_currently_used', label: 'Not currently used' },
+] as const
+
 type Option = { readonly value: string; readonly label: string }
 
 /** How a field is entered. Some kinds render together (the geotag pair, checkboxes + "other"). */
@@ -46,14 +63,17 @@ export type FieldInput =
   | { kind: 'radio'; options: readonly Option[] }
   | { kind: 'checkboxes'; options: readonly Option[]; otherField: string } // otherField: key of its checkboxes-other field
   | { kind: 'checkboxes-other'; maxLength: number } // rendered inside its checkboxes field
+  // A list of equipment, each with operation status, utilization status and capacity per batch.
+  | { kind: 'equipment'; presets: readonly string[]; operation: readonly Option[]; utilization: readonly Option[] }
 
-export type FieldSection = 'location' | 'about' | 'products' | 'msmes'
+export type FieldSection = 'location' | 'about' | 'products' | 'msmes' | 'equipment'
 
 export const SECTIONS: Record<FieldSection, { title: string; description: string }> = {
   location: { title: 'Location', description: 'Where the FIC is. Its pin on the map uses these coordinates.' },
   about: { title: 'About the FIC', description: 'The center and the institution that hosts it.' },
   products: { title: 'Products and licensing', description: 'Output so far and License to Operate status.' },
   msmes: { title: 'MSMEs', description: 'Micro, small and medium enterprises the FIC works with.' },
+  equipment: { title: 'FIC equipment', description: 'Tick the equipment your FIC has, or add others. For each, give its status and capacity.' },
 }
 
 type FieldConfig = {
@@ -204,6 +224,22 @@ export const ENTRY_FIELDS = {
     schema: z.array(z.enum(ASSISTANCE_TYPES.map((o) => o.value))),
     showIn: { preview: true },
   },
+  equipment: {
+    label: 'FIC equipment',
+    section: 'equipment',
+    input: { kind: 'equipment', presets: EQUIPMENT_PRESETS, operation: EQUIPMENT_OPERATION, utilization: EQUIPMENT_UTILIZATION },
+    schema: z
+      .array(
+        z.object({
+          name: z.string().trim().min(1, 'Name the equipment.').max(100, 'Keep it under 100 characters.'),
+          operation_status: z.enum(EQUIPMENT_OPERATION.map((o) => o.value), { error: 'Select the operation status.' }),
+          utilization_status: z.enum(EQUIPMENT_UTILIZATION.map((o) => o.value), { error: 'Select the utilization status.' }),
+          capacity: z.string().trim().min(1, 'Enter the capacity per batch.').max(100, 'Keep it under 100 characters.'),
+        }),
+      )
+      .max(50, 'That is a lot of equipment. List up to 50.'),
+    showIn: { preview: true },
+  },
   assistance_other: {
     label: 'Other type of assistance',
     section: 'msmes',
@@ -242,6 +278,13 @@ export const entrySchema = z.object(shape).superRefine((entry, ctx) => {
       message: 'Products commercialized cannot be more than products developed.',
     })
   }
+  // Each piece of equipment once (case-insensitive), like the backend's distinct:ignore_case.
+  const seen = new Set<string>()
+  entry.equipment.forEach((item, i) => {
+    const key = item.name.trim().toLowerCase()
+    if (key && seen.has(key)) ctx.addIssue({ code: 'custom', path: ['equipment', i, 'name'], message: 'This equipment is listed twice.' })
+    seen.add(key)
+  })
   if (entry.assistance_types.includes('other') && entry.assistance_other.trim() === '') {
     ctx.addIssue({ code: 'custom', path: ['assistance_other'], message: 'Describe the other type of assistance.' })
   }
@@ -260,6 +303,7 @@ export const EMPTY_ENTRY = {
   msmes_needing_fabrication_details: '',
   assistance_types: [],
   assistance_other: '',
+  equipment: [],
 } satisfies Partial<EntryValues>
 
 export const fieldsInSection = (section: FieldSection) =>

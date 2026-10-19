@@ -44,6 +44,7 @@ class FicEntryResource extends JsonResource
             'msmes_served' => $this->msmes_served,
             'assistance_types' => $this->assistance_types,
             'assistance_other' => $this->assistance_other,
+            'equipment' => $this->equipment ?? [],
             'is_mine' => $request->user()?->id === $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

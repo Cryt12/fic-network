@@ -5,6 +5,9 @@ import type { FicEntry, Paginated } from '@/features/entries/api'
 /** An entry as the superadmin sees it: every field plus who submitted it. */
 export type AdminEntry = FicEntry & { owner: { id: number; name: string; email: string } }
 
+/** How many entries (FICs) list one type of assistance requested by MSMEs. */
+export type AssistanceCount = { type: string; label: string; fics: number }
+
 export type EntryTotals = {
   entries: number
   products_developed: number
@@ -37,7 +40,7 @@ export function filterQuery(filters: EntryFilters, extra: Record<string, string>
 export function useAdminEntries(filters: EntryFilters, page: number) {
   return useQuery({
     queryKey: ['admin', 'entries', filters, page],
-    queryFn: () => api<Paginated<AdminEntry> & { totals: EntryTotals }>(`/admin/entries?${filterQuery(filters, { page: String(page) })}`),
+    queryFn: () => api<Paginated<AdminEntry> & { totals: EntryTotals; assistance: AssistanceCount[] }>(`/admin/entries?${filterQuery(filters, { page: String(page) })}`),
     placeholderData: keepPreviousData,
   })
 }

@@ -15,6 +15,7 @@ import { downloadReport, FILTER_KEYS, useAdminEntries, type AdminEntry, type Ent
 import { useRegions } from '@/features/entries/api'
 import { ASSISTANCE_TYPES, ENTRY_FIELD_KEYS, ENTRY_FIELDS, LTO_STATUSES, shortLabel } from '@/features/entries/fields'
 import { formatField } from '@/features/entries/format'
+import { AssistanceStrip } from '@/features/entries/AssistanceStrip'
 import { LtoBadge } from '@/features/entries/LtoBadge'
 import { errorMessage } from '@/lib/api'
 import { formatExact } from '@/lib/time'
@@ -24,7 +25,7 @@ import { useDocumentTitle } from '@/lib/use-document-title'
 const COLUMNS = ENTRY_FIELD_KEYS.filter((key) => key !== 'name' && ENTRY_FIELDS[key].input.kind !== 'checkboxes-other')
 
 /** Free text and multi-select values need room, or rows turn into tall towers. */
-const WIDE_KINDS = new Set(['textarea', 'checkboxes'])
+const WIDE_KINDS = new Set(['textarea', 'equipment'])
 
 const ALL = 'all' // Radix Select can't use "" as an item value
 const numberFormat = new Intl.NumberFormat('en-PH')
@@ -305,7 +306,13 @@ function EntriesTable({ entries }: { entries: AdminEntry[] }) {
               </TableCell>
               {COLUMNS.map((key) => (
                 <TableCell key={key} className="whitespace-normal text-muted-foreground tabular-nums">
-                  {key === 'lto_status' ? <LtoBadge status={entry.lto_status} /> : formatField(entry, key)}
+                  {key === 'lto_status' ? (
+                    <LtoBadge status={entry.lto_status} />
+                  ) : key === 'assistance_types' ? (
+                    <AssistanceStrip selected={entry.assistance_types} other={entry.assistance_other} />
+                  ) : (
+                    formatField(entry, key)
+                  )}
                 </TableCell>
               ))}
               <TableCell className="pr-4 text-muted-foreground">{formatExact(entry.created_at)}</TableCell>

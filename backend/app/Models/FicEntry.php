@@ -42,6 +42,7 @@ class FicEntry extends Model
             'msmes_needing_tech_interventions' => 'integer',
             'msmes_served' => 'integer',
             'assistance_types' => AsEnumCollection::of(AssistanceType::class),
+            'equipment' => 'array',
         ];
     }
 

@@ -39,6 +39,10 @@ class FicEntryTest extends TestCase
             'msmes_served' => 40,
             'assistance_types' => ['product_development', 'packaging_labeling'],
             'assistance_other' => null,
+            'equipment' => [
+                ['name' => 'Spray dryer', 'operation_status' => 'operational', 'utilization_status' => 'regularly_used', 'capacity' => '5 L per hour'],
+                ['name' => 'Cacao winnower', 'operation_status' => 'under_maintenance', 'utilization_status' => 'rarely_used', 'capacity' => '20 kg'],
+            ],
             ...$overrides,
         ];
     }
@@ -55,11 +59,21 @@ class FicEntryTest extends TestCase
             ->assertJsonPath('data.province', 'Agusan del Norte')
             ->assertJsonPath('data.city', 'City of Butuan')
             ->assertJsonPath('data.barangay', 'Ampayon')
+            ->assertJsonPath('data.equipment.0.name', 'Spray dryer')
+            ->assertJsonPath('data.equipment.1.utilization_status', 'rarely_used')
             ->assertJsonPath('data.latitude', 8.9475123)
             ->assertJsonPath('data.assistance_types', ['product_development', 'packaging_labeling'])
             ->assertJsonPath('data.is_mine', true);
 
         $this->assertSame($user->id, FicEntry::sole()->user_id);
+    }
+
+    public function test_equipment_is_optional(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->postJson('/api/entries', self::validEntry(['equipment' => []]))
+            ->assertCreated()
+            ->assertJsonPath('data.equipment', []);
     }
 
     public function test_user_id_in_the_payload_is_ignored(): void
@@ -88,6 +102,12 @@ class FicEntryTest extends TestCase
             'msmes_served' => ['msmes_served' => -1],
             'assistance_types.0' => ['assistance_types' => ['astrology']],
             'assistance_other' => ['assistance_types' => ['other'], 'assistance_other' => ''],
+            'equipment.0.operation_status' => ['equipment' => [['name' => 'Oven', 'operation_status' => 'broken', 'utilization_status' => 'regularly_used', 'capacity' => '1 tray']]],
+            'equipment.0.capacity' => ['equipment' => [['name' => 'Oven', 'operation_status' => 'operational', 'utilization_status' => 'regularly_used', 'capacity' => '']]],
+            'equipment.1.name' => ['equipment' => [
+                ['name' => 'Oven', 'operation_status' => 'operational', 'utilization_status' => 'regularly_used', 'capacity' => '1 tray'],
+                ['name' => 'oven', 'operation_status' => 'operational', 'utilization_status' => 'rarely_used', 'capacity' => '2 trays'],
+            ]],
         ];
 
         foreach ($cases as $field => $overrides) {
