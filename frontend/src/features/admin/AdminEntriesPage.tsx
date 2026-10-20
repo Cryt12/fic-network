@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, FileSpreadsheet, LoaderCircle, Search, SearchX, X } from 'lucide-react'
+import { ChartColumn, ChevronLeft, ChevronRight, FileSpreadsheet, LoaderCircle, Search, SearchX, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { downloadReport, FILTER_KEYS, useAdminEntries, type AdminEntry, type EntryFilters, type EntryTotals } from '@/features/admin/api'
+import { downloadDashboardData, downloadReport, FILTER_KEYS, useAdminEntries, type AdminEntry, type EntryFilters, type EntryTotals } from '@/features/admin/api'
 import { useRegions } from '@/features/entries/api'
 import { ASSISTANCE_TYPES, ENTRY_FIELD_KEYS, ENTRY_FIELDS, LTO_STATUSES, shortLabel } from '@/features/entries/fields'
 import { formatField } from '@/features/entries/format'
@@ -86,10 +86,13 @@ export function AdminEntriesPage() {
       title="All Entries"
       className="max-w-[1400px]"
       actions={
-        <Button onClick={download} disabled={downloading || data?.meta.total === 0}>
-          {downloading ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
-          {downloading ? 'Preparing...' : 'Download Excel'}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <DashboardDataButton />
+          <Button onClick={download} disabled={downloading || data?.meta.total === 0}>
+            {downloading ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <FileSpreadsheet data-icon="inline-start" />}
+            {downloading ? 'Preparing...' : 'Download Excel'}
+          </Button>
+        </div>
       }
     >
       <p className="-mt-6 mb-6 max-w-[65ch] text-sm text-muted-foreground">
@@ -345,5 +348,29 @@ function TableSkeleton() {
         ))}
       </div>
     </div>
+  )
+}
+
+/** The data behind every Dashboard chart as one Excel file (one sheet per chart, nationwide, no filters). */
+function DashboardDataButton() {
+  const [downloading, setDownloading] = useState(false)
+
+  const download = async () => {
+    setDownloading(true)
+    try {
+      await downloadDashboardData()
+      toast.success('Dashboard data downloaded.')
+    } catch (e) {
+      toast.error(`Couldn't generate the dashboard data. ${errorMessage(e)}`)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  return (
+    <Button variant="outline" onClick={download} disabled={downloading} title="Every Dashboard chart's numbers, one sheet per chart">
+      {downloading ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <ChartColumn data-icon="inline-start" />}
+      {downloading ? 'Preparing...' : 'Dashboard data'}
+    </Button>
   )
 }

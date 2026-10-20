@@ -1,43 +1,17 @@
 import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { EQUIPMENT_OPERATION, EQUIPMENT_UTILIZATION } from '@/features/entries/fields'
 import type { RegionSummary, Summary } from '@/features/summary/api'
+import { equipmentConfig as configFor, OPTIONS, type View } from '@/features/summary/equipment-style'
 import { ChartCard, ScrollX } from '@/features/summary/RegionCharts'
 import { cn } from '@/lib/utils'
-
-type View = 'operation' | 'utilization'
-
-/** Status colors: operation reads as a traffic light; utilization runs from dark green (regular) to grey (unused). */
-const COLORS: Record<View, Record<string, string>> = {
-  operation: {
-    operational: '#13834f',
-    under_maintenance: '#e0a11b',
-    non_operational: '#d1495b',
-    for_decommissioning: '#5b6472',
-  },
-  utilization: {
-    regularly_used: '#13834f',
-    occasionally_used: '#5bb98a',
-    rarely_used: '#a9d8bd',
-    not_currently_used: '#9aa3ad',
-  },
-}
-
-const OPTIONS: Record<View, readonly { value: string; label: string }[]> = {
-  operation: EQUIPMENT_OPERATION,
-  utilization: EQUIPMENT_UTILIZATION,
-}
 
 const DESCRIPTIONS: Record<View, string> = {
   operation: 'Equipment listed by the FICs in each region, by operation status.',
   utilization: 'Equipment listed by the FICs in each region, by how often it is used.',
 }
-
-const configFor = (view: View) =>
-  Object.fromEntries(OPTIONS[view].map((o) => [o.value, { label: o.label, color: COLORS[view][o.value] }])) satisfies ChartConfig
 
 /** Tooltips show the full region name; the axis uses the short code (NCR, CAR, I ... BARMM). */
 const fullName = (_: unknown, payload: readonly { payload?: { name?: string } }[]) => payload[0]?.payload?.name ?? ''

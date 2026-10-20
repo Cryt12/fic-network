@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\DashboardExportController;
 use App\Http\Controllers\Api\Admin\EntryController as AdminEntryController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AuthController;
@@ -43,10 +44,11 @@ Route::middleware(['auth:sanctum', 'password.changed'])->group(function () {
     Route::get('summary', SummaryController::class);
 });
 
-// All entries with every field + Excel: superadmin and DOST FIC Focal accounts (read-only).
+// All entries with every field + Excel, and the Dashboard data Excel: superadmin and DOST FIC Focal accounts (read-only).
 Route::middleware(['auth:sanctum', 'password.changed', 'can:view-all-entries'])->prefix('admin')->group(function () {
     Route::get('entries', [AdminEntryController::class, 'index']);
     Route::get('entries/export', [AdminEntryController::class, 'export']);
+    Route::get('dashboard/export', DashboardExportController::class);
 });
 
 // Superadmin only. The gate is checked on the server for every request here.

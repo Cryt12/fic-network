@@ -82,4 +82,20 @@ class SummaryTest extends TestCase
         $this->assertSame(['regularly_used' => 2, 'occasionally_used' => 0, 'rarely_used' => 1, 'not_currently_used' => 1], $regions['XIII']['equipment']['utilization']);
         $this->assertSame(0, array_sum($regions['VII']['equipment']['operation']));
     }
+
+    public function test_equipment_types_nationwide(): void
+    {
+        $item = fn (string $name, string $util, string $op = 'operational') => ['name' => $name, 'operation_status' => $op, 'utilization_status' => $util, 'capacity' => '10 kg'];
+        FicEntry::factory()->create(['region' => 'XIII', 'equipment' => [$item('Oven', 'regularly_used'), $item('Spray dryer', 'rarely_used', 'under_maintenance')]]);
+        FicEntry::factory()->create(['region' => 'VII', 'equipment' => [$item('oven ', 'rarely_used'), $item('Spray dryer', 'rarely_used')]]);
+        FicEntry::factory()->create(['region' => 'I', 'equipment' => [$item('Oven', 'not_currently_used'), $item('Cacao  winnower', 'regularly_used')]]);
+        FicEntry::factory()->create(['equipment' => [$item('Oven', 'regularly_used')]])->delete(); // deleted: not counted
+
+        $types = $this->actingAs(User::factory()->create())->getJson('/api/summary')->assertOk()->json('data.equipment_types');
+
+        $this->assertSame(['Oven', 'Spray dryer', 'Cacao winnower'], array_column($types, 'name')); // most units first
+        $this->assertSame([3, 2, 1], array_column($types, 'total'));
+        $this->assertSame(['regularly_used' => 1, 'occasionally_used' => 0, 'rarely_used' => 1, 'not_currently_used' => 1], $types[0]['utilization']);
+        $this->assertSame(['operational' => 1, 'under_maintenance' => 1, 'non_operational' => 0, 'for_decommissioning' => 0], $types[1]['operation']);
+    }
 }

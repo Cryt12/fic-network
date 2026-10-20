@@ -60,7 +60,7 @@ class EntryReport
         'msmes_needing_tech_interventions' => 'MSMEs needing technology interventions',
     ];
 
-    private const BRAND_GREEN = '206B47';
+    public const BRAND_GREEN = '206B47';
 
     private string $timezone;
 
@@ -285,7 +285,8 @@ class EntryReport
         };
     }
 
-    private function headerStyle(): Style
+    /** White bold text on brand green: table headings in every report. */
+    public static function headerStyle(): Style
     {
         return new Style(fontBold: true, fontColor: 'FFFFFF', backgroundColor: self::BRAND_GREEN, shouldWrapText: true);
     }

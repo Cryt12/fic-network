@@ -29,6 +29,15 @@ export type Summary = {
   regions: RegionSummary[]
   /** Every assistance type, in form order, including those nobody requested. */
   assistance: AssistanceSummary[]
+  /** Every equipment type listed nationwide, most units first (names grouped ignoring case and spacing). */
+  equipment_types: EquipmentTypeSummary[]
+}
+
+export type EquipmentTypeSummary = {
+  name: string
+  total: number
+  operation: Record<string, number>
+  utilization: Record<string, number>
 }
 
 export function useSummary() {

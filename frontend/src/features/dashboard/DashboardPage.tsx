@@ -17,6 +17,7 @@ import { useSummary } from '@/features/summary/api'
 import { RegionBreakdown } from '@/features/summary/RegionBreakdown'
 import { AssistanceChart } from '@/features/summary/AssistanceChart'
 import { EquipmentChart } from '@/features/summary/EquipmentChart'
+import { EquipmentTypesChart } from '@/features/summary/EquipmentTypesChart'
 import { MsmePartnersChart } from '@/features/summary/MsmePartnersChart'
 import { RegionCharts } from '@/features/summary/RegionCharts'
 import { SummaryStrip } from '@/features/summary/SummaryStrip'
@@ -150,6 +151,7 @@ export function DashboardPage() {
           <MsmePartnersChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
           <AssistanceChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
           <EquipmentChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
+          <EquipmentTypesChart summary={summary.data} isPending={summary.isPending} className="mt-6" />
         </div>
       </main>
 

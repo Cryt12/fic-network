@@ -46,8 +46,18 @@ export function useAdminEntries(filters: EntryFilters, page: number) {
 }
 
 /** Downloads the Excel report for the current filters (same session cookie as every API call). */
-export async function downloadReport(filters: EntryFilters): Promise<void> {
-  const response = await fetch(`/api/admin/entries/export?${filterQuery(filters)}`, {
+export function downloadReport(filters: EntryFilters): Promise<void> {
+  return downloadExcel(`/api/admin/entries/export?${filterQuery(filters)}`, 'fic-entries-report.xlsx')
+}
+
+/** Every Dashboard chart's data, one sheet per chart. */
+export function downloadDashboardData(): Promise<void> {
+  return downloadExcel('/api/admin/dashboard/export', 'onefic-dashboard-data.xlsx')
+}
+
+/** Fetches an Excel file with the session cookie and saves it under the server's filename. */
+async function downloadExcel(url: string, fallbackName: string): Promise<void> {
+  const response = await fetch(url, {
     credentials: 'same-origin',
     headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json' },
   })
@@ -56,13 +66,13 @@ export async function downloadReport(filters: EntryFilters): Promise<void> {
     throw new ApiError(response.status, body?.message ?? "Couldn't generate the report.")
   }
 
-  const filename = /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? 'fic-entries-report.xlsx'
-  const url = URL.createObjectURL(await response.blob())
-  const link = Object.assign(document.createElement('a'), { href: url, download: filename })
+  const filename = /filename="?([^";]+)"?/.exec(response.headers.get('Content-Disposition') ?? '')?.[1] ?? fallbackName
+  const blobUrl = URL.createObjectURL(await response.blob())
+  const link = Object.assign(document.createElement('a'), { href: blobUrl, download: filename })
   document.body.append(link)
   link.click()
   link.remove()
-  URL.revokeObjectURL(url)
+  URL.revokeObjectURL(blobUrl)
 }
 
 export type AdminUser = {
