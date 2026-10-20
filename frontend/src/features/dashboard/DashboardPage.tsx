@@ -87,7 +87,7 @@ export function DashboardPage() {
         </div>
 
         {/* The map fills most of the screen; the charts are a scroll away. */}
-        <div className="relative mx-3 mt-3 h-[max(420px,calc(100dvh-15rem))] sm:mx-4 sm:mt-4">
+        <div className="relative mx-3 mt-3 h-[max(420px,calc(100dvh-19rem))] sm:mx-4 sm:mt-4">
           {/* Framed map. isolate: keeps Leaflet's own z-indexes (up to 1000) below dialogs and drawers. */}
           <div className="absolute inset-0 isolate overflow-hidden rounded-lg border shadow-[0_6px_20px_-12px_oklch(0.3_0.02_257/0.35)]">
             <FicMap>
