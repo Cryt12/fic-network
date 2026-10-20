@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 // "role" is deliberately not fillable: only SuperadminSeeder and AuthController::registerFocal set it.
-#[Fillable(['name', 'email', 'password', 'first_name', 'middle_name', 'last_name', 'age', 'position', 'dost_unit', 'region'])]
+#[Fillable(['name', 'email', 'password', 'first_name', 'middle_name', 'last_name', 'age', 'position', 'dost_unit', 'region', 'organization', 'contact_number', 'bio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -70,6 +70,12 @@ class User extends Authenticatable
     public function canViewAllEntries(): bool
     {
         return $this->isSuperadmin() || $this->isFocal();
+    }
+
+    /** Public URL of the profile photo (served from storage/app/public via the storage link). */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar_path ? '/storage/'.$this->avatar_path : null;
     }
 
     /**

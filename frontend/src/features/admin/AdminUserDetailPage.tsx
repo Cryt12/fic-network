@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NotFoundPage } from '@/app/NotFoundPage'
+import { UserAvatar } from '@/components/UserAvatar'
 import { downloadReport, useAdminEntries, useAdminUser, useLoginHistory, useResetPassword, type AdminUser, type EntryFilters } from '@/features/admin/api'
 import { LoginResultBadge } from '@/features/admin/LoginResultBadge'
 import { LtoBadge } from '@/features/entries/LtoBadge'
@@ -75,6 +76,7 @@ function UserHeader({ user }: { user: AdminUser }) {
     <header>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
+          <UserAvatar name={user.name} url={user.avatar_url} className="mr-1" />
           <h1 className="text-2xl font-semibold tracking-tight">{user.name}</h1>
           {user.is_superadmin && (
             <Badge variant="secondary" className="bg-accent text-accent-foreground">
@@ -95,6 +97,21 @@ function UserHeader({ user }: { user: AdminUser }) {
         Registered {formatExact(user.created_at)}
       </p>
 
+      {!user.is_focal && (user.organization || user.position || user.contact_number) && (
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
+          {[
+            ['Organization', user.organization],
+            ['Position / designation', user.position],
+            ['Contact number', user.contact_number],
+          ].map(([label, value]) => (
+            <div key={label as string}>
+              <dt className="text-xs text-muted-foreground">{label}</dt>
+              <dd className="font-medium">{value || 'Not set'}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
       {user.is_focal && (
         <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
           {[
@@ -106,6 +123,7 @@ function UserHeader({ user }: { user: AdminUser }) {
             ['Middle name', user.middle_name || 'None'],
             ['Last name', user.last_name],
             ['Age', user.age],
+            ['Contact number', user.contact_number],
           ].map(([label, value]) => (
             <div key={label as string}>
               <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -114,6 +132,8 @@ function UserHeader({ user }: { user: AdminUser }) {
           ))}
         </dl>
       )}
+
+      {user.bio && <p className="mt-4 max-w-[65ch] text-sm whitespace-pre-line text-muted-foreground">{user.bio}</p>}
 
       <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-y py-4 sm:grid-cols-4">
         {stats.map((stat) => (

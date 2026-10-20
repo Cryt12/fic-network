@@ -92,6 +92,10 @@ export type AdminUser = {
   age: number | null
   position: string | null
   dost_unit: string | null
+  organization: string | null
+  contact_number: string | null
+  bio: string | null
+  avatar_url: string | null
   region_name: string | null
   created_at: string
   entries_count: number

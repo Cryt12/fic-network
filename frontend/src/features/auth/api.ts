@@ -20,6 +20,17 @@ export type User = {
   can_add_entries: boolean
   /** DOST FIC Focal accounts report Food MSME partners for their region. */
   can_add_msme_reports: boolean
+  first_name: string | null
+  middle_name: string | null
+  last_name: string | null
+  /** DOST FIC Focal accounts only. */
+  age: number | null
+  organization: string | null
+  contact_number: string | null
+  bio: string | null
+  /** Profile photo, or null for the initials avatar. */
+  avatar_url: string | null
+  region: string | null
   region_name: string | null
   position: string | null
   dost_unit: string | null

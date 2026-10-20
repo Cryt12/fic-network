@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/app/AppShell'
-import { ComingSoonPage } from '@/app/ComingSoonPage'
 import { AdminRoute, CanAddEntriesRoute, CanAddMsmeReportsRoute, GuestRoute, ProtectedRoute, ViewAllEntriesRoute } from '@/app/guards'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { AdminEntriesPage } from '@/features/admin/AdminEntriesPage'
@@ -16,6 +15,7 @@ import { EditEntryPage, NewEntryPage } from '@/features/entries/EntryFormPages'
 import { MyEntriesPage } from '@/features/entries/MyEntriesPage'
 import { EditMsmeReportPage, NewMsmeReportPage } from '@/features/msme-reports/MsmeReportFormPages'
 import { MyMsmeReportsPage } from '@/features/msme-reports/MyMsmeReportsPage'
+import { ProfilePage } from '@/features/profile/ProfilePage'
 import { SummaryPage } from '@/features/summary/SummaryPage'
 
 export const router = createBrowserRouter([
@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
             element: <ViewAllEntriesRoute />,
             children: [{ index: true, element: <AdminEntriesPage /> }],
           },
-          { path: 'profile', element: <ComingSoonPage title="My Profile" phase={5} /> },
+          { path: 'profile', element: <ProfilePage /> },
           {
             path: 'admin',
             element: <AdminRoute />,

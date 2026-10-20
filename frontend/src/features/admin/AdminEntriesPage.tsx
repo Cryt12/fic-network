@@ -239,12 +239,19 @@ type FilterSelectProps = {
   onChange: (value: string) => void
 }
 
+/** The full text of the current choice, for the tooltip when it's cut short. */
+function selectedLabel(value: string, allLabel: string, options: readonly { value: string; label: string }[]): string {
+  return options.find((o) => o.value === value)?.label ?? allLabel
+}
+
 function FilterSelect({ id, label, value, allLabel, options, onChange }: FilterSelectProps) {
   return (
-    <div className="grid gap-1.5">
+    // min-w-0 + truncate: a long choice ("Product Testing / Analysis") shortens with "..." instead of
+    // pushing past its grid column into the next filter.
+    <div className="grid min-w-0 gap-1.5">
       <Label htmlFor={id}>{label}</Label>
       <Select value={value || ALL} onValueChange={(v) => onChange(v === ALL ? '' : v)}>
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} className="w-full min-w-0 *:data-[slot=select-value]:block *:data-[slot=select-value]:truncate" title={selectedLabel(value, allLabel, options)}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

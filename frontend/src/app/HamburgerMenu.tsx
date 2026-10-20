@@ -2,6 +2,7 @@ import { Building2, ChartColumn, Database, FilePlus2, LayoutList, LogOut, Layout
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { toast } from 'sonner'
+import { UserAvatar } from '@/components/UserAvatar'
 import { Wordmark } from '@/components/Wordmark'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -62,8 +63,13 @@ export function HamburgerMenu() {
         </SheetHeader>
 
         <div className="px-4 py-4">
-          <p className="truncate text-sm font-medium">{user.name}</p>
-          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+          <NavLink to="/profile" onClick={() => setOpen(false)} className="group flex items-center gap-3 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <UserAvatar name={user.name} url={user.avatar_url} />
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium group-hover:underline">{user.name}</span>
+              <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
+            </span>
+          </NavLink>
           {user.is_superadmin && (
             <p className="mt-2 inline-flex items-center gap-1 rounded-md bg-accent px-1.5 py-0.5 text-xs font-medium text-accent-foreground">
               <ShieldCheck className="size-3.5" aria-hidden />

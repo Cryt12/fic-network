@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\FicEntryController;
 use App\Http\Controllers\Api\MapMarkerController;
 use App\Http\Controllers\Api\MsmeReportController;
 use App\Http\Controllers\Api\PlaceController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RecentLoginController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\SummaryController;
@@ -33,6 +34,12 @@ Route::get('places/{place}/location', [PlaceController::class, 'location'])->mid
 // password.changed: an account reset by the superadmin can't use anything else until it sets a new password.
 Route::middleware(['auth:sanctum', 'password.changed'])->group(function () {
     Route::get('recent-logins', RecentLoginController::class);
+
+    // My Profile: always the signed-in account's own details.
+    Route::patch('profile', [ProfileController::class, 'update']);
+    Route::patch('profile/email', [ProfileController::class, 'updateEmail'])->middleware('throttle:10,1');
+    Route::post('profile/photo', [ProfileController::class, 'updateAvatar'])->middleware('throttle:20,1');
+    Route::delete('profile/photo', [ProfileController::class, 'destroyAvatar']);
 
     Route::get('my/entries', [FicEntryController::class, 'mine']);
     Route::apiResource('entries', FicEntryController::class)->except('index');
