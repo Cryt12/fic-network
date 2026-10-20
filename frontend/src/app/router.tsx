@@ -13,6 +13,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { EditEntryPage, NewEntryPage } from '@/features/entries/EntryFormPages'
 import { MyEntriesPage } from '@/features/entries/MyEntriesPage'
+import { ImageReportPage } from '@/features/image-reports/ImageReportPage'
 import { EditMsmeReportPage, NewMsmeReportPage } from '@/features/msme-reports/MsmeReportFormPages'
 import { MyMsmeReportsPage } from '@/features/msme-reports/MyMsmeReportsPage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
@@ -68,6 +69,12 @@ export const router = createBrowserRouter([
             children: [{ index: true, element: <AdminEntriesPage /> }],
           },
           { path: 'profile', element: <ProfilePage /> },
+          {
+            // Superadmin: infographics of the Dashboard data, drawn through OpenRouter.
+            path: 'image-report',
+            element: <AdminRoute />,
+            children: [{ index: true, element: <ImageReportPage /> }],
+          },
           {
             path: 'admin',
             element: <AdminRoute />,

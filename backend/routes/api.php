@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\DashboardExportController;
 use App\Http\Controllers\Api\Admin\EntryController as AdminEntryController;
+use App\Http\Controllers\Api\Admin\ImageReportController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FicEntryController;
@@ -64,4 +65,11 @@ Route::middleware(['auth:sanctum', 'password.changed', 'can:access-admin'])->pre
     Route::get('users/{user}', [AdminUserController::class, 'show']);
     Route::get('users/{user}/login-history', [AdminUserController::class, 'loginHistory']);
     Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword']);
+
+    // Generate Image Report (OpenRouter). Each image costs money, hence the throttle and daily cap.
+    Route::get('image-reports', [ImageReportController::class, 'index']);
+    Route::post('image-reports', [ImageReportController::class, 'store'])->middleware('throttle:6,1');
+    Route::get('image-reports/{imageReport}', [ImageReportController::class, 'show']);
+    Route::get('image-reports/{imageReport}/image', [ImageReportController::class, 'image']);
+    Route::delete('image-reports/{imageReport}', [ImageReportController::class, 'destroy']);
 });

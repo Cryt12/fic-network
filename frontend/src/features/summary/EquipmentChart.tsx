@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { RegionSummary, Summary } from '@/features/summary/api'
 import { equipmentConfig as configFor, OPTIONS, type View } from '@/features/summary/equipment-style'
+import { shareFormatter, totalLabel } from '@/features/summary/equipment-tooltip'
 import { ChartCard, ScrollX } from '@/features/summary/RegionCharts'
 import { cn } from '@/lib/utils'
 
@@ -13,8 +14,6 @@ const DESCRIPTIONS: Record<View, string> = {
   utilization: 'Equipment listed by the FICs in each region, by how often it is used.',
 }
 
-/** Tooltips show the full region name; the axis uses the short code (NCR, CAR, I ... BARMM). */
-const fullName = (_: unknown, payload: readonly { payload?: { name?: string } }[]) => payload[0]?.payload?.name ?? ''
 
 /** FIC equipment per region as stacked columns: operation status, or utilization. */
 export function EquipmentChart({ summary, isPending, className }: { summary: Summary | undefined; isPending: boolean; className?: string }) {
@@ -71,7 +70,7 @@ function StatusColumns({ regions, view }: { regions: RegionSummary[]; view: View
           <CartesianGrid vertical={false} />
           <XAxis dataKey="code" tickLine={false} axisLine={false} tickMargin={8} interval={0} fontSize={11} />
           <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={44} fontSize={11} />
-          <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent labelFormatter={fullName} />} />
+          <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent className="min-w-64" labelFormatter={totalLabel} formatter={shareFormatter(view)} />} />
           {/* Legend in stack order (bottom to top), not Recharts' default alphabetical order. */}
           <ChartLegend
             content={<ChartLegendContent className="flex-wrap" />}

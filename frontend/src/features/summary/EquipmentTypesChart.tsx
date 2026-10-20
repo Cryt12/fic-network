@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { EquipmentTypeSummary, Summary } from '@/features/summary/api'
 import { number } from '@/features/summary/chart-style'
 import { equipmentConfig, OPTIONS, type View } from '@/features/summary/equipment-style'
+import { shareFormatter, totalLabel } from '@/features/summary/equipment-tooltip'
 import { ChartCard } from '@/features/summary/RegionCharts'
 import { cn } from '@/lib/utils'
 
@@ -90,7 +91,7 @@ function TypeBars({ rows, view }: { rows: EquipmentTypeSummary[]; view: View }) 
         <CartesianGrid horizontal={false} />
         <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} />
         <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} interval={0} width={150} fontSize={12} />
-        <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent />} />
+        <ChartTooltip cursor={{ fillOpacity: 0.4 }} content={<ChartTooltipContent className="min-w-64" labelFormatter={totalLabel} formatter={shareFormatter(view)} />} />
         {/* Legend in stack order (left to right), not Recharts' default alphabetical order. */}
         <ChartLegend
           content={<ChartLegendContent className="flex-wrap" />}
