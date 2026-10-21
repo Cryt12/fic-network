@@ -29,6 +29,8 @@ class DashboardSummary
         $byRegion = FicEntry::query()
             ->toBase()
             ->selectRaw('region, count(*) as fics, coalesce(sum(products_developed), 0) as products_developed, coalesce(sum(products_commercialized), 0) as products_commercialized')
+            // Personnel: entries from before these fields existed are null (not reported), so they're counted apart.
+            ->selectRaw('coalesce(sum(fulltime_personnel), 0) as fulltime_personnel, coalesce(sum(associate_personnel), 0) as associate_personnel, count(fulltime_personnel) as personnel_reported')
             ->groupBy('region')
             ->get()
             ->keyBy('region');
@@ -65,6 +67,9 @@ class DashboardSummary
             'fics' => (int) ($byRegion[$code]->fics ?? 0),
             'products_developed' => (int) ($byRegion[$code]->products_developed ?? 0),
             'products_commercialized' => (int) ($byRegion[$code]->products_commercialized ?? 0),
+            'fulltime_personnel' => (int) ($byRegion[$code]->fulltime_personnel ?? 0),
+            'associate_personnel' => (int) ($byRegion[$code]->associate_personnel ?? 0),
+            'personnel_reported' => (int) ($byRegion[$code]->personnel_reported ?? 0), // FICs that gave their personnel
             'assistance' => collect(AssistanceType::cases())->mapWithKeys(fn (AssistanceType $type) => [
                 $type->value => (int) ($assistance[$code][$type->value] ?? 0),
             ])->all(),
@@ -82,6 +87,9 @@ class DashboardSummary
                 'equipment' => $regions->sum(fn (array $r) => array_sum($r['equipment']['operation'])),
                 'msme_partners' => $regions->sum('msme_partners'),
                 'msmes_with_lto' => $regions->sum('msmes_with_lto'),
+                'fulltime_personnel' => $regions->sum('fulltime_personnel'),
+                'associate_personnel' => $regions->sum('associate_personnel'),
+                'personnel_reported' => $regions->sum('personnel_reported'),
             ],
             'regions' => $regions->all(),
             'equipment_types' => self::equipmentTypes(),

@@ -36,6 +36,8 @@ class EntryReport
         'city' => 'City / Municipality',
         'name' => 'Name of FIC',
         'host_institution' => 'Host institution (university)',
+        'fulltime_personnel' => 'Number of full-time personnel (stationed in the FIC)',
+        'associate_personnel' => 'Number of associate personnel (not reporting full-time in the FIC)',
         'products_developed' => 'Number of products developed',
         'products_commercialized' => 'Number of FIC-developed products commercialized (adopted by MSME or university spin-off through TLA)',
         'lto_status' => 'License to Operate (LTO) status',

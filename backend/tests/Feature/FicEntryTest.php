@@ -30,6 +30,8 @@ class FicEntryTest extends TestCase
             'longitude' => 125.5406456,
             'name' => 'Butuan Food Innovation Center',
             'host_institution' => 'Caraga State University',
+            'fulltime_personnel' => 6,
+            'associate_personnel' => 14,
             'products_developed' => 12,
             'products_commercialized' => 4,
             'lto_status' => 'in_process',
@@ -100,6 +102,8 @@ class FicEntryTest extends TestCase
             'products_commercialized' => ['products_developed' => 3, 'products_commercialized' => 4],
             'lto_status' => ['lto_status' => 'expired'],
             'msmes_served' => ['msmes_served' => -1],
+            'fulltime_personnel' => ['fulltime_personnel' => null],
+            'associate_personnel' => ['associate_personnel' => -2],
             'assistance_types.0' => ['assistance_types' => ['astrology']],
             'assistance_other' => ['assistance_types' => ['other'], 'assistance_other' => ''],
             'equipment.0.operation_status' => ['equipment' => [['name' => 'Oven', 'operation_status' => 'broken', 'utilization_status' => 'regularly_used', 'capacity' => '1 tray']]],
@@ -229,5 +233,21 @@ class FicEntryTest extends TestCase
         $this->getJson('/api/regions')
             ->assertOk()
             ->assertJsonFragment(['code' => 'XIII', 'name' => 'Region XIII (Caraga)']);
+    }
+
+    public function test_entries_made_before_the_personnel_fields_show_them_as_not_reported(): void
+    {
+        $user = User::factory()->create();
+        $entry = FicEntry::factory()->for($user)->create(['fulltime_personnel' => null, 'associate_personnel' => null]);
+
+        $this->actingAs($user)->getJson("/api/entries/{$entry->id}")
+            ->assertOk()
+            ->assertJsonPath('data.fulltime_personnel', null)
+            ->assertJsonPath('data.associate_personnel', null);
+
+        // Editing it now needs both numbers.
+        $this->putJson("/api/entries/{$entry->id}", self::validEntry(['fulltime_personnel' => null, 'associate_personnel' => null]))
+            ->assertJsonValidationErrors(['fulltime_personnel', 'associate_personnel']);
+        $this->putJson("/api/entries/{$entry->id}", self::validEntry())->assertOk()->assertJsonPath('data.fulltime_personnel', 6);
     }
 }

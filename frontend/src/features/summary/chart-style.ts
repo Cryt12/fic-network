@@ -6,6 +6,10 @@
 export const DEVELOPED = '#13834f'
 export const COMMERCIALIZED = '#e0a11b'
 
+/** FIC personnel: full-time in the brand green, associate in a lighter green of the same family. */
+export const FULLTIME = DEVELOPED
+export const ASSOCIATE = '#5bb98a'
+
 export const number = new Intl.NumberFormat('en-PH')
 export const percent = new Intl.NumberFormat('en-PH', { style: 'percent', maximumFractionDigits: 0 })
 

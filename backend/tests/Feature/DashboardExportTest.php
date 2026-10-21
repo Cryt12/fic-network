@@ -41,7 +41,7 @@ class DashboardExportTest extends TestCase
 
         $sheets = $this->readWorkbook($response->streamedContent());
         $this->assertSame([
-            'Overview', 'FICs and products', 'Food MSME partners', 'Assistance nationwide',
+            'Overview', 'FICs and products', 'FIC personnel', 'Food MSME partners', 'Assistance nationwide',
             'Assistance by region', 'Equipment by region', 'Equipment by type',
         ], array_keys($sheets));
 

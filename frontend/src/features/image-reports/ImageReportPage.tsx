@@ -352,6 +352,14 @@ function Figures({ report }: { report: ImageReport }) {
           ],
         ] as [string, string][])
       : []),
+    ...(f.personnel && f.personnel.reported_by > 0
+      ? ([
+          [
+            'FIC personnel',
+            `${number.format(f.personnel.fulltime)} full-time, ${number.format(f.personnel.associate)} associate (from ${f.personnel.reported_by} of ${f.fics} FICs)`,
+          ],
+        ] as [string, string][])
+      : []),
     ...(f.msme_partners > 0
       ? ([['Food MSME partners', `${number.format(f.msme_partners)}, ${number.format(f.msmes_with_lto)} with LTO`]] as [string, string][])
       : []),

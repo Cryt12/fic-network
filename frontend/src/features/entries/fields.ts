@@ -66,11 +66,12 @@ export type FieldInput =
   // A list of equipment, each with operation status, utilization status and capacity per batch.
   | { kind: 'equipment'; presets: readonly string[]; operation: readonly Option[]; utilization: readonly Option[] }
 
-export type FieldSection = 'location' | 'about' | 'products' | 'msmes' | 'equipment'
+export type FieldSection = 'location' | 'about' | 'personnel' | 'products' | 'msmes' | 'equipment'
 
 export const SECTIONS: Record<FieldSection, { title: string; description: string }> = {
   location: { title: 'Location', description: 'Where the FIC is. Its pin on the map uses these coordinates.' },
   about: { title: 'About the FIC', description: 'The center and the institution that hosts it.' },
+  personnel: { title: 'FIC personnel', description: 'The people who work in the FIC. Enter 0 if none.' },
   products: { title: 'Products and licensing', description: 'Output so far and License to Operate status.' },
   msmes: { title: 'MSMEs', description: 'Micro, small and medium enterprises the FIC works with.' },
   equipment: { title: 'FIC equipment', description: 'Tick the equipment your FIC has, or add others. For each, give its status and capacity.' },
@@ -156,6 +157,24 @@ export const ENTRY_FIELDS = {
     input: { kind: 'text', maxLength: 255 },
     schema: requiredText('host institution', 255),
     showIn: { popup: true, table: true, preview: true },
+  },
+  fulltime_personnel: {
+    label: 'Number of full-time personnel',
+    shortLabel: 'Full-time personnel',
+    description: 'Stationed in the FIC.',
+    section: 'personnel',
+    input: { kind: 'count' },
+    schema: count.max(100_000, 'That number is too large.'),
+    showIn: { preview: true },
+  },
+  associate_personnel: {
+    label: 'Number of associate personnel',
+    shortLabel: 'Associate personnel',
+    description: 'Not reporting full-time in the FIC.',
+    section: 'personnel',
+    input: { kind: 'count' },
+    schema: count.max(100_000, 'That number is too large.'),
+    showIn: { preview: true },
   },
   products_developed: {
     label: 'Number of products developed',

@@ -29,7 +29,7 @@ type Step = {
 const STEPS: Step[] = [
   { title: 'Account', subtitle: 'Sign up to put your Food Innovation Center on the map.', sections: [] },
   { title: 'Location', subtitle: 'Pick your region and pin where your FIC is.', sections: ['location'] },
-  { title: 'FIC details', subtitle: 'Tell the network about your FIC. You can edit this later.', sections: ['about', 'products', 'msmes', 'equipment'] },
+  { title: 'FIC details', subtitle: 'Tell the network about your FIC. You can edit this later.', sections: ['about', 'personnel', 'products', 'msmes', 'equipment'] },
 ]
 
 const fieldsOfStep = (step: Step): Path<RegisterValues>[] =>

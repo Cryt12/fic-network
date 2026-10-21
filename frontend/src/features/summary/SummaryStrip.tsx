@@ -31,12 +31,19 @@ export function SummaryStrip({ summary, isPending }: { summary: Summary | undefi
   const stats = [
     { label: 'FICs nationwide', value: number.format(national.fics), detail: `in ${national.regions_with_fics} of ${regions.length} regions` },
     { label: 'Products developed', value: number.format(national.products_developed), swatch: DEVELOPED, detail: 'by all FICs' },
-    { label: 'Commercialized', value: number.format(national.products_commercialized), swatch: COMMERCIALIZED, detail: 'adopted through TLA' },
-    { label: 'Commercialization rate', value: rate, detail: 'of products developed' },
+    { label: 'Commercialized', value: number.format(national.products_commercialized), swatch: COMMERCIALIZED, detail: rate === '-' ? 'no products yet' : `${rate} of products developed` },
+    {
+      label: 'FIC personnel',
+      value: number.format(national.fulltime_personnel + national.associate_personnel),
+      detail:
+        national.personnel_reported > 0
+          ? `${number.format(national.fulltime_personnel)} full-time, ${number.format(national.associate_personnel)} associate`
+          : 'not reported yet',
+    },
     {
       label: 'FIC equipment',
       value: number.format(national.equipment),
-      detail: `${national.equipment === 1 ? 'unit' : 'units'} of ${equipmentTypes.length} equipment ${equipmentTypes.length === 1 ? 'type' : 'types'}`,
+      detail: `${national.equipment === 1 ? 'unit' : 'units'}, ${equipmentTypes.length} ${equipmentTypes.length === 1 ? 'type' : 'types'}`,
     },
   ]
 

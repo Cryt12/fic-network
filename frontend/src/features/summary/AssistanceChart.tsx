@@ -75,6 +75,12 @@ export function AssistanceChart({ summary, isPending, className }: { summary: Su
   )
 }
 
+/** The region-by-type grid on its own, for the Summary page. */
+export function AssistanceRegionGrid({ summary }: { summary: Summary }) {
+  const wide = useWide()
+  return <RegionGrid regions={summary.regions} types={ranked(summary.assistance)} total={summary.national.fics} wide={wide} />
+}
+
 const fullLabel = (_: unknown, payload: readonly { payload?: AssistanceSummary }[]) => payload[0]?.payload?.label ?? ''
 
 /** Horizontal bars: how many FICs nationwide report MSMEs requesting each type. */

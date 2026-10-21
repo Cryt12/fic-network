@@ -19,14 +19,14 @@ class SummaryTest extends TestCase
 
     public function test_national_and_per_region_totals(): void
     {
-        FicEntry::factory()->create(['region' => 'XIII', 'products_developed' => 10, 'products_commercialized' => 4]);
-        FicEntry::factory()->create(['region' => 'XIII', 'products_developed' => 6, 'products_commercialized' => 1]);
-        FicEntry::factory()->create(['region' => 'VII', 'products_developed' => 3, 'products_commercialized' => 0]);
+        FicEntry::factory()->create(['region' => 'XIII', 'products_developed' => 10, 'products_commercialized' => 4, 'fulltime_personnel' => 8, 'associate_personnel' => 3]);
+        FicEntry::factory()->create(['region' => 'XIII', 'products_developed' => 6, 'products_commercialized' => 1, 'fulltime_personnel' => 10, 'associate_personnel' => 0]);
+        FicEntry::factory()->create(['region' => 'VII', 'products_developed' => 3, 'products_commercialized' => 0, 'fulltime_personnel' => null, 'associate_personnel' => null]); // not reported yet
         FicEntry::factory()->create(['region' => 'VII', 'products_developed' => 50])->delete(); // deleted: not counted
 
         $data = $this->actingAs(User::factory()->create())->getJson('/api/summary')->assertOk()->json('data');
 
-        $this->assertSame(['fics' => 3, 'products_developed' => 19, 'products_commercialized' => 5, 'regions_with_fics' => 2, 'equipment' => 0, 'msme_partners' => 0, 'msmes_with_lto' => 0], $data['national']);
+        $this->assertSame(['fics' => 3, 'products_developed' => 19, 'products_commercialized' => 5, 'regions_with_fics' => 2, 'equipment' => 0, 'msme_partners' => 0, 'msmes_with_lto' => 0, 'fulltime_personnel' => 18, 'associate_personnel' => 3, 'personnel_reported' => 2], $data['national']);
         $this->assertCount(count(config('regions')), $data['regions']); // every region, even with no FICs
 
         $regions = collect($data['regions'])->keyBy('code');
@@ -34,6 +34,8 @@ class SummaryTest extends TestCase
         $this->assertSame(16, $regions['XIII']['products_developed']);
         $this->assertSame(5, $regions['XIII']['products_commercialized']);
         $this->assertSame(0, $regions['NCR']['fics']);
+        $this->assertSame([18, 3, 2], [$regions['XIII']['fulltime_personnel'], $regions['XIII']['associate_personnel'], $regions['XIII']['personnel_reported']]);
+        $this->assertSame(0, $regions['VII']['personnel_reported']);
     }
 
     public function test_assistance_counts_every_type(): void

@@ -28,6 +28,8 @@ export type ReportFigures = {
   equipment: { units: number; types: number; operational: number; top_types: { name: string; units: number }[] }
   msme_partners: number
   msmes_with_lto: number
+  /** Missing on reports made before personnel was tracked. */
+  personnel?: { fulltime: number; associate: number; reported_by: number }
   regions: { region: string; fics: number; developed: number; commercialized: number }[]
 }
 

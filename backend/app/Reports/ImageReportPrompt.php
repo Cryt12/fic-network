@@ -27,7 +27,8 @@ class ImageReportPrompt
 
         $chapters = [
             'The hook: the title "Bridging Innovation & Market: The DOST OneFIC Impact", the subtitle "Food Innovation Centers across the Philippines, as of '.$date.'", and the number of FICs nationwide as the hero number.',
-            'Strength in Numbers: how many of the regions have FICs, with a simple map of the Philippines highlighting them, and the regions with the most FICs.',
+            'Strength in Numbers: how many of the regions have FICs, with a simple map of the Philippines highlighting them, and the regions with the most FICs'
+                .($figures['personnel']['reported_by'] > 0 ? '; also the people behind them (full-time and associate FIC personnel).' : '.'),
             'Driving Product Development: products developed as the hero number, with a short bar chart of the leading regions.',
             'From Lab to Market: products commercialized as the hero number, the commercialization rate, and the leading regions.',
             'What MSMEs Ask For: the most requested types of assistance, as a short ranked list or bar chart.',
@@ -107,6 +108,11 @@ class ImageReportPrompt
             ],
             'msme_partners' => $national['msme_partners'],
             'msmes_with_lto' => $national['msmes_with_lto'],
+            'personnel' => [
+                'fulltime' => $national['fulltime_personnel'],
+                'associate' => $national['associate_personnel'],
+                'reported_by' => $national['personnel_reported'],
+            ],
             'regions' => $fullTable
                 ? array_map(fn (array $r) => [
                     'region' => $r['name'], 'fics' => $r['fics'],
@@ -150,6 +156,10 @@ class ImageReportPrompt
         if ($f['equipment']['units'] > 0) {
             $lines[] = "- FIC equipment: {$n($f['equipment']['units'])} units of {$f['equipment']['types']} types, {$n($f['equipment']['operational'])} of them operational. Most listed: "
                 .implode('; ', array_map(fn (array $t) => "{$t['name']}: {$t['units']}", $f['equipment']['top_types'])).'.';
+        }
+        if (($f['personnel']['reported_by'] ?? 0) > 0) {
+            $p = $f['personnel'];
+            $lines[] = "- FIC personnel: {$n($p['fulltime'])} full-time (stationed in the FIC) and {$n($p['associate'])} associate (not reporting full-time in the FIC), as reported by {$p['reported_by']} of {$n($f['fics'])} FICs.";
         }
         if ($f['msme_partners'] > 0) {
             $lines[] = "- Food MSME partners reported by DOST regional offices: {$n($f['msme_partners'])}, of which {$n($f['msmes_with_lto'])} hold a License to Operate.";

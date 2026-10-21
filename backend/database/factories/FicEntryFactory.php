@@ -68,6 +68,8 @@ class FicEntryFactory extends Factory
                 : null,
             'msmes_needing_tech_interventions' => fake()->numberBetween(0, 14),
             'msmes_served' => fake()->numberBetween(5, 120),
+            'fulltime_personnel' => fake()->numberBetween(2, 15),
+            'associate_personnel' => fake()->numberBetween(0, 20),
             'assistance_types' => array_map(fn (AssistanceType $t) => $t->value, $types),
             'assistance_other' => null,
         ];

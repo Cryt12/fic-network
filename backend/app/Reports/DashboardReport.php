@@ -47,6 +47,7 @@ class DashboardReport
         $sheets = [
             'Overview' => $this->overview(...),
             'FICs and products' => $this->ficsAndProducts(...),
+            'FIC personnel' => $this->personnel(...),
             'Food MSME partners' => $this->msmePartners(...),
             'Assistance nationwide' => $this->assistanceNationwide(...),
             'Assistance by region' => $this->assistanceByRegion(...),
@@ -86,6 +87,9 @@ class DashboardReport
             'Food MSME partners (DOST FIC Focal reports)' => $national['msme_partners'],
             'Food MSME partners with LTO' => $national['msmes_with_lto'],
             'FIC equipment units listed' => $national['equipment'],
+            'FIC personnel, full-time (stationed in the FIC)' => $national['fulltime_personnel'],
+            'FIC personnel, associate (not full-time in the FIC)' => $national['associate_personnel'],
+            'FICs that reported their personnel' => $national['personnel_reported'].' of '.$national['fics'],
         ] as $label => $value) {
             $writer->addRow(Row::fromValues([$label, $value]));
         }
@@ -98,6 +102,17 @@ class DashboardReport
             'Products developed' => 'products_developed',
             'Products commercialized' => 'products_commercialized',
         ]);
+    }
+
+    private function personnel(Writer $writer): void
+    {
+        $this->regionTable($writer, [
+            'Full-time personnel (stationed in the FIC)' => 'fulltime_personnel',
+            'Associate personnel (not full-time in the FIC)' => 'associate_personnel',
+            'FICs that reported' => 'personnel_reported',
+        ]);
+        $writer->addRow(Row::fromValues([]));
+        $writer->addRow(Row::fromValues(['Entries made before the personnel fields existed are counted once their owners edit them.']));
     }
 
     private function msmePartners(Writer $writer): void

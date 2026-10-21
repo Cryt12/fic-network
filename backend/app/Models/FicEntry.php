@@ -36,6 +36,8 @@ class FicEntry extends Model
             'latitude' => 'float',
             'longitude' => 'float',
             'products_developed' => 'integer',
+            'fulltime_personnel' => 'integer',
+            'associate_personnel' => 'integer',
             'products_commercialized' => 'integer',
             'lto_status' => LtoStatus::class,
             'msmes_needing_fabrication' => 'integer',

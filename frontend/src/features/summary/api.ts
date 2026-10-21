@@ -11,6 +11,11 @@ export type RegionSummary = {
   assistance: Record<string, number>
   /** Equipment items listed by the region's FICs, per status (every status present). */
   equipment: { operation: Record<string, number>; utilization: Record<string, number> }
+  /** FIC personnel added up over the region's FICs that reported them (older entries may not have yet). */
+  fulltime_personnel: number
+  associate_personnel: number
+  /** How many of the region's FICs gave their personnel numbers. */
+  personnel_reported: number
   /** Food MSME partners reported by the region's DOST FIC Focal accounts (all reports added up). */
   msme_partners: number
   msmes_with_lto: number
@@ -24,7 +29,7 @@ export type AssistanceSummary = {
 }
 
 export type Summary = {
-  national: { fics: number; products_developed: number; products_commercialized: number; regions_with_fics: number; equipment: number; msme_partners: number; msmes_with_lto: number }
+  national: { fics: number; products_developed: number; products_commercialized: number; regions_with_fics: number; equipment: number; msme_partners: number; msmes_with_lto: number; fulltime_personnel: number; associate_personnel: number; personnel_reported: number }
   /** Every region, in the official order, including those with no FICs. */
   regions: RegionSummary[]
   /** Every assistance type, in form order, including those nobody requested. */

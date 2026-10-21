@@ -61,6 +61,8 @@ class FicEntryRequest extends FormRequest
             $prefix.'longitude' => ['required', 'numeric', 'between:-180,180'],
             $prefix.'name' => ['required', 'string', 'max:255'],
             $prefix.'host_institution' => ['required', 'string', 'max:255'],
+            $prefix.'fulltime_personnel' => ['required', 'integer', 'min:0', 'max:100000'],
+            $prefix.'associate_personnel' => ['required', 'integer', 'min:0', 'max:100000'],
             $prefix.'products_developed' => $count,
             $prefix.'products_commercialized' => [...$count, 'lte:'.$prefix.'products_developed'],
             $prefix.'lto_status' => ['required', Rule::enum(LtoStatus::class)],

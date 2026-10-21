@@ -35,6 +35,8 @@ class FicEntryResource extends JsonResource
             'longitude' => $this->longitude,
             'name' => $this->name,
             'host_institution' => $this->host_institution,
+            'fulltime_personnel' => $this->fulltime_personnel,
+            'associate_personnel' => $this->associate_personnel,
             'products_developed' => $this->products_developed,
             'products_commercialized' => $this->products_commercialized,
             'lto_status' => $this->lto_status,

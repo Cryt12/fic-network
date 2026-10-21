@@ -24,7 +24,8 @@ export function formatField(entry: Pick<FicEntry, 'region_name'> & Partial<FicEn
     case 'geotag-pair':
       return typeof value === 'number' ? String(Number(value.toFixed(7))) : ''
     case 'count':
-      return typeof value === 'number' ? numberFormat.format(value) : ''
+      // Null only on entries made before a count field existed (e.g. FIC personnel).
+      return typeof value === 'number' ? numberFormat.format(value) : 'Not reported yet'
     case 'radio':
       return optionLabel(input.options, String(value ?? ''))
     case 'checkboxes': {

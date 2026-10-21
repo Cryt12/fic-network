@@ -9,7 +9,7 @@ import { EntryFields } from '@/features/entries/EntryFields'
 import { ENTRY_FIELD_KEYS, entrySchema, type EntryValues, type FieldSection } from '@/features/entries/fields'
 import { applyServerErrors, scrollToFirstError } from '@/lib/form-errors'
 
-const SECTIONS: FieldSection[] = ['location', 'about', 'products', 'msmes', 'equipment']
+const SECTIONS: FieldSection[] = ['location', 'about', 'personnel', 'products', 'msmes', 'equipment']
 
 type EntryFormProps = {
   defaultValues: Partial<EntryValues>
